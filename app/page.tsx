@@ -1,5 +1,11 @@
 import { getSupabase } from "@/lib/supabase";
 
+type Product = {
+  id: number;
+  name: string;
+  price: number;
+};
+
 function getSetupStatus() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -24,6 +30,8 @@ export default async function Home() {
 
   let connectionStatus = "Not tested yet";
   let connectionOk = false;
+  let products: Product[] = [];
+  let productsError: string | null = null;
 
   if (setup.configured) {
     const supabase = getSupabase()!;
@@ -32,10 +40,23 @@ export default async function Home() {
     connectionStatus = error
       ? `Could not connect: ${error.message}`
       : "Connected to Supabase";
+
+    if (connectionOk) {
+      const { data, error: fetchError } = await supabase
+        .from("products")
+        .select("id, name, price")
+        .order("name");
+
+      if (fetchError) {
+        productsError = fetchError.message;
+      } else {
+        products = data ?? [];
+      }
+    }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 font-sans">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-10 font-sans">
       <main className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-semibold text-zinc-900">my-POS</h1>
         <p className="mt-2 text-zinc-600">
@@ -63,19 +84,54 @@ export default async function Home() {
           />
         </div>
 
+        {setup.configured && connectionOk && (
+          <div className="mt-8">
+            <h2 className="font-medium text-zinc-900">Products</h2>
+            {productsError ? (
+              <p className="mt-2 text-sm text-amber-700">
+                Could not load products: {productsError}. Run{" "}
+                <code className="rounded bg-zinc-200 px-1">supabase/setup.sql</code>{" "}
+                in your Supabase SQL Editor.
+              </p>
+            ) : products.length === 0 ? (
+              <p className="mt-2 text-sm text-zinc-600">
+                No products yet. Run{" "}
+                <code className="rounded bg-zinc-200 px-1">supabase/setup.sql</code>{" "}
+                in your Supabase SQL Editor.
+              </p>
+            ) : (
+              <ul className="mt-3 divide-y divide-zinc-100 rounded-lg border border-zinc-100">
+                {products.map((product) => (
+                  <li
+                    key={product.id}
+                    className="flex items-center justify-between px-4 py-3 text-sm"
+                  >
+                    <span className="text-zinc-900">{product.name}</span>
+                    <span className="font-medium text-zinc-700">
+                      ${Number(product.price).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         <div className="mt-8 rounded-lg bg-zinc-50 p-4 text-sm text-zinc-600">
-          <p className="font-medium text-zinc-800">Next steps</p>
+          <p className="font-medium text-zinc-800">Setup checklist</p>
           <ol className="mt-2 list-inside list-decimal space-y-1">
             <li>
-              Open{" "}
-              <code className="rounded bg-zinc-200 px-1">.env.local</code> and
-              paste your Supabase credentials
+              Paste Supabase credentials into{" "}
+              <code className="rounded bg-zinc-200 px-1">.env.local</code>
             </li>
             <li>
-              Run <code className="rounded bg-zinc-200 px-1">npm run dev</code>{" "}
-              (or restart it if it is already running)
+              Run{" "}
+              <code className="rounded bg-zinc-200 px-1">
+                supabase/setup.sql
+              </code>{" "}
+              in Supabase SQL Editor
             </li>
-            <li>Refresh this page to see &quot;Connected to Supabase&quot;</li>
+            <li>Refresh this page to see your products</li>
           </ol>
         </div>
       </main>
