@@ -147,20 +147,20 @@ export default function LoginPage() {
           <p className="font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wide">
             🔑 Operator Sign-In Details:
           </p>
-          <ul className="mt-2 space-y-1 font-semibold">
-            <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
-              <span>Admin:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">nikishkumaranr@gmail.com</code>
-            </li>
-            <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
-              <span>Cashier:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">nikishkumaran5@gmail.com</code>
-            </li>
-            <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
-              <span>Password:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">Pos@123</code>
-            </li>
-          </ul>
+          <div className="mt-3 space-y-2">
+            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
+              <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Admin Email</p>
+              <code className="text-white block mt-0.5 font-mono text-2xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaranr@gmail.com</code>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
+              <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Cashier Email</p>
+              <code className="text-white block mt-0.5 font-mono text-2xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaran5@gmail.com</code>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 flex justify-between items-center">
+              <span className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Password</span>
+              <code className="text-white font-mono text-2xs select-all bg-white/10 px-2 py-0.5 rounded">Pos@123</code>
+            </div>
+          </div>
         </div>
       </div>
     </div>
