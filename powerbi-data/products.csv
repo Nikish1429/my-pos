@@ -1,0 +1,25 @@
+id,name,category,price,stock_quantity
+1,"Espresso","Drinks",120,100
+3,"Latte","Drinks",190,85
+5,"Iced Tea","Drinks",130,90
+6,"Lemonade","Drinks",110,75
+7,"Hot Chocolate","Drinks",220,50
+8,"Croissant","Bakery",120,40
+9,"Chocolate Muffin","Bakery",140,35
+10,"Blueberry Scone","Bakery",150,30
+11,"Bagel with Cream Cheese","Bakery",160,25
+12,"Chocolate Chip Cookie","Bakery",80,60
+15,"Club Sandwich","Snacks",280,20
+16,"Chicken Wrap","Snacks",240,25
+17,"Caprese Panini","Snacks",320,15
+18,"Potato Chips","Snacks",60,100
+19,"Pretzels","Snacks",80,80
+20,"Mixed Nuts","Snacks",180,50
+21,"Popcorn","Snacks",90,60
+22,"Fruit Salad","Snacks",150,15
+23,"Granola Bar","Snacks",50,90
+24,"Greek Yogurt","Snacks",120,40
+14,"Apple Danish","Bakery",150,19
+13,"Brownie","Bakery",120,44
+2,"Cappuccino","Drinks",180,79
+4,"Americano","Drinks",140,1

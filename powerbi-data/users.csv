@@ -1,0 +1,11 @@
+id,name,email,role
+1,"Alice Smith","alice@mypos.com","admin"
+2,"Bob Jones","bob@mypos.com","admin"
+3,"Charlie Brown","charlie@mypos.com","cashier"
+4,"David Miller","david@mypos.com","cashier"
+5,"Emma Wilson","emma@mypos.com","cashier"
+6,"Frank Taylor","frank@mypos.com","cashier"
+7,"Grace Thomas","grace@mypos.com","cashier"
+8,"Henry Anderson","henry@mypos.com","cashier"
+9,"Ivy Jackson","ivy@mypos.com","cashier"
+10,"Jack White","jack@mypos.com","cashier"
