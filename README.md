@@ -136,6 +136,28 @@ graph TD
 
 ---
 
+## 📂 Project Directory Structure
+
+```text
+my-pos/
+├── app/                  # Next.js App Router Pages & APIs
+│   ├── ai-manager/       # Chatbot, Demand Forecasts, Anomalies
+│   ├── analytics/        # Business Intelligence Charts
+│   ├── api/              # Backend Database APIs (Sales, Products, Customers)
+│   ├── billing/          # Checkout Terminal & Cashier Billing
+│   ├── history/          # Receipt Logs & Invoice History
+│   ├── inventory/        # Stock Control & Product Management
+│   └── login/            # Sunset Mountain Glassmorphic Sign-In
+├── lib/                  # Shared Auth Context & Supabase Initializer
+├── powerbi-data/         # CSV Seeding Data & Power BI Datasets
+├── public/               # Static Media Assets (Scanner Sound Effects)
+│   ├── screenshots/      # Gallery images for README
+│   └── sounds/           # Billing sound triggers
+└── supabase/             # Postgres database schema configuration
+```
+
+---
+
 ## 🚀 How to Run Locally
 
 ### 1. Clone the Repository
