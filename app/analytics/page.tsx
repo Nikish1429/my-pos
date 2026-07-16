@@ -14,7 +14,6 @@ import {
   Coffee,
   PieChart as PieIcon,
   Award,
-  Calendar,
   Filter,
   RefreshCw,
   MousePointerClick,
@@ -82,10 +81,10 @@ export default function AnalyticsPage() {
   const [error, setError] = useState<string | null>(null);
 
   // --- DROPDOWN FILTERS STATE ---
-  const [timeRange, setTimeRange] = useState<string>("all"); // all, 30, 90, 180
+  const [timeRange, setTimeRange] = useState<string>("all"); // all, 1, 3, 7, 30, 90, 180
 
   // --- GRAPH GRAPH-CLICK (CROSS-FILTERING) STATE ---
-  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // filter by clicking Region Bar
+  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // filter by clicking Region/Place Bar
   const [selectedCategory, setSelectedCategory] = useState<string>("All"); // filter by clicking Category Pie
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null); // filter by clicking Timeline point
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null); // filter by clicking Product Bar
@@ -140,7 +139,7 @@ export default function AnalyticsPage() {
         if (saleDate < cutoff) return false;
       }
 
-      // Region Filter (from Region Bar Chart click)
+      // Region/Place Filter (from Place Bar Chart click)
       const region = sale.customers?.region || "Walk-in";
       if (selectedRegion !== "All" && region !== selectedRegion) return false;
 
@@ -186,7 +185,6 @@ export default function AnalyticsPage() {
     let totalRevenue = 0;
     let totalOrders = 0;
 
-    // If filtering by items specifically (Category or Product click), sum up item amounts
     if (selectedCategory === "All" && !selectedProduct) {
       totalRevenue = filteredSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
       totalOrders = filteredSales.length;
@@ -227,22 +225,26 @@ export default function AnalyticsPage() {
         };
       });
 
-    // 5. Group Revenue by Region (Bar Chart)
+    // 5. Group Revenue by Chennai Places (Bar Chart)
     const regionalRevenueMap: { [key: string]: number } = {};
-    const regionsList = ["Delhi NCR", "Maharashtra", "Karnataka", "West Bengal", "Tamil Nadu", "Walk-in"];
+    const regionsList = ["Adyar", "T. Nagar", "Velachery", "Mylapore", "Anna Nagar", "Walk-in"];
     regionsList.forEach((r) => (regionalRevenueMap[r] = 0));
 
     if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
         const region = s.customers?.region || "Walk-in";
-        regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(s.total_amount);
+        if (regionsList.includes(region)) {
+          regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(s.total_amount);
+        }
       });
     } else {
       filteredSaleItems.forEach((item) => {
         const sale = sales.find((s) => s.id === item.sale_id);
         if (sale) {
           const region = sale.customers?.region || "Walk-in";
-          regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(item.quantity) * Number(item.unit_price);
+          if (regionsList.includes(region)) {
+            regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(item.quantity) * Number(item.unit_price);
+          }
         }
       });
     }
@@ -400,28 +402,31 @@ export default function AnalyticsPage() {
                 className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
               >
                 <option value="all">All Time (Last 6 Months)</option>
-                <option value="30">Last 30 Days</option>
-                <option value="90">Last 90 Days</option>
-                <option value="180">Last 180 Days</option>
+                <option value="1">Last 24 Hours (1 Day)</option>
+                <option value="3">Last 3 Days</option>
+                <option value="7">Last 7 Days (1 Week)</option>
+                <option value="30">Last 30 Days (1 Month)</option>
+                <option value="90">Last 90 Days (3 Months)</option>
+                <option value="180">Last 180 Days (6 Months)</option>
               </select>
             </div>
 
-            {/* Filter 2: Region */}
+            {/* Filter 2: Region / Place */}
             <div>
               <label className="block text-3xs font-extrabold uppercase tracking-wider text-zinc-400">
-                Customer Region
+                Chennai Place
               </label>
               <select
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
               >
-                <option value="All">All Regions</option>
-                <option value="Delhi NCR">Delhi NCR</option>
-                <option value="Maharashtra">Maharashtra</option>
-                <option value="Karnataka">Karnataka</option>
-                <option value="West Bengal">West Bengal</option>
-                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="All">All Places</option>
+                <option value="Adyar">Adyar</option>
+                <option value="T. Nagar">T. Nagar</option>
+                <option value="Velachery">Velachery</option>
+                <option value="Mylapore">Mylapore</option>
+                <option value="Anna Nagar">Anna Nagar</option>
                 <option value="Walk-in">Walk-in Customers</option>
               </select>
             </div>
@@ -449,6 +454,11 @@ export default function AnalyticsPage() {
             <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-50">
               <div className="flex flex-wrap gap-1.5 items-center">
                 <span className="text-3xs font-bold text-zinc-400 uppercase">Active Filters:</span>
+                {timeRange !== "all" && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    🕒 Range: Last {timeRange} Days <button onClick={() => setTimeRange("all")} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
                 {selectedMonth && (
                   <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
                     📅 {selectedMonth} <button onClick={() => setSelectedMonth(null)} className="hover:text-red-400">✕</button>
@@ -596,15 +606,15 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Chart B: Revenue by Region (Bar with Cross-Filtering) */}
+          {/* Chart B: Revenue by Place (Bar with Cross-Filtering) */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col">
             <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-zinc-500" /> Revenue by Region
+                <MapPin className="h-4 w-4 text-zinc-500" /> Revenue by Place (Chennai)
               </div>
               {selectedRegion !== "All" && (
                 <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
-                  Filtered Region: {selectedRegion}
+                  Filtered: {selectedRegion}
                 </span>
               )}
             </h3>
