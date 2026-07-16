@@ -1,25 +1,31 @@
 id,name,category,price,stock_quantity
 1,"Espresso","Drinks",120,100
+2,"Cappuccino","Drinks",180,80
 3,"Latte","Drinks",190,85
+4,"Americano","Drinks",140,120
 5,"Iced Tea","Drinks",130,90
 6,"Lemonade","Drinks",110,75
 7,"Hot Chocolate","Drinks",220,50
-8,"Croissant","Bakery",120,40
-9,"Chocolate Muffin","Bakery",140,35
-10,"Blueberry Scone","Bakery",150,30
-11,"Bagel with Cream Cheese","Bakery",160,25
-12,"Chocolate Chip Cookie","Bakery",80,60
-15,"Club Sandwich","Snacks",280,20
-17,"Caprese Panini","Snacks",320,15
-18,"Potato Chips","Snacks",60,100
-19,"Pretzels","Snacks",80,80
-20,"Mixed Nuts","Snacks",180,50
-21,"Popcorn","Snacks",90,60
-22,"Fruit Salad","Snacks",150,15
-23,"Granola Bar","Snacks",50,90
-24,"Greek Yogurt","Snacks",120,40
-14,"Apple Danish","Bakery",150,19
-2,"Cappuccino","Drinks",180,79
-4,"Americano","Drinks",140,1
-13,"Brownie","Bakery",120,43
-16,"Chicken Wrap","Snacks",240,24
+8,"Masala Chai","Drinks",50,200
+9,"Filter Coffee","Drinks",60,150
+10,"Croissant","Bakery",120,40
+11,"Chocolate Muffin","Bakery",140,35
+12,"Blueberry Scone","Bakery",150,30
+13,"Bagel with Cream Cheese","Bakery",160,25
+14,"Chocolate Chip Cookie","Bakery",80,60
+15,"Brownie","Bakery",120,45
+16,"Apple Danish","Bakery",150,20
+17,"Gulab Jamun (2 pcs)","Bakery",70,50
+18,"Kaju Katli (4 pcs)","Bakery",120,40
+19,"Club Sandwich","Snacks",280,20
+20,"Chicken Wrap","Snacks",240,25
+21,"Caprese Panini","Snacks",320,15
+22,"Potato Chips","Snacks",60,100
+23,"Pretzels","Snacks",80,80
+24,"Mixed Nuts","Snacks",180,50
+25,"Popcorn","Snacks",90,60
+26,"Fruit Salad","Snacks",150,15
+27,"Granola Bar","Snacks",50,90
+28,"Greek Yogurt","Snacks",120,40
+29,"Samosa (2 pcs)","Snacks",40,120
+30,"Paneer Puff","Snacks",60,80
