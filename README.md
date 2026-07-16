@@ -7,6 +7,21 @@ A premium, full-stack Next.js and Supabase-powered Point of Sale (POS) system de
 
 ---
 
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td align="center"><b>Sunset Login & Operator Credentials</b></td>
+    <td align="center"><b>Retail Intelligence Cockpit & Chatbot</b></td>
+  </tr>
+  <tr>
+    <td><img src="public/screenshots/login.png" alt="Login Page" width="400"/></td>
+    <td><img src="public/screenshots/cockpit.png" alt="Intelligence Cockpit" width="400"/></td>
+  </tr>
+</table>
+
+---
+
 ## 🔑 Operator Sign-In Credentials
 
 Sign in directly on the [Login Screen](https://my-pos-lyart.vercel.app/login) using these pre-configured project credentials:
