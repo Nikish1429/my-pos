@@ -9,6 +9,7 @@ type Product = {
   category: string;
   price: number;
   stock_quantity: number;
+  barcode?: string;
 };
 
 type Customer = {
@@ -30,6 +31,37 @@ export default function BillingPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [barcodeInput, setBarcodeInput] = useState("");
+
+  const handleBarcodeScan = (code: string) => {
+    if (!code) return;
+    const cleanCode = code.trim();
+    const product = products.find((p) => p.barcode === cleanCode);
+
+    if (product) {
+      // Sound effect (Web Audio API)
+      try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(1400, audioCtx.currentTime); // 1.4kHz barcode beep
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.08); // 80ms beep
+      } catch (e) {
+        console.error("Audio beep failed", e);
+      }
+
+      addToCart(product);
+      setBarcodeInput("");
+    } else {
+      alert(`⚠️ Product with Barcode: "${cleanCode}" not found in catalog.`);
+    }
+  };
 
   // Cart & checkout state
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -344,19 +376,58 @@ export default function BillingPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-100 pb-4">
             <div>
               <h2 className="text-lg font-bold text-zinc-900">Products Catalog</h2>
-              <p className="text-xs text-zinc-500">Search and select items to add to cart.</p>
+              <p className="text-xs text-zinc-500">Search or scan items to add to cart.</p>
             </div>
-            <div className="relative w-full md:w-64">
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-9 pr-4 text-xs outline-none focus:border-zinc-500 focus:bg-white transition-all text-zinc-900"
-              />
-              <svg className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            <div className="flex flex-col md:flex-row gap-2 items-stretch md:items-center">
+              {/* Barcode Scanner Input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Scan barcode..."
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleBarcodeScan(barcodeInput);
+                    }
+                  }}
+                  className="rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-8 pr-3 text-xs outline-none focus:border-zinc-500 focus:bg-white transition-all text-zinc-900 w-full md:w-36 font-semibold"
+                />
+                <svg className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m-8 4v8m16-8v8m-12-4h8M4 6h16M4 18h16" />
+                </svg>
+              </div>
+
+              {/* Quick Scan Simulator */}
+              <select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    handleBarcodeScan(e.target.value);
+                    e.target.value = ""; // Reset
+                  }
+                }}
+                className="rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-2 text-3xs outline-none focus:border-zinc-500 text-zinc-700 font-extrabold uppercase tracking-wide cursor-pointer"
+              >
+                <option value="">🎯 Quick Scan Sim</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.barcode}>
+                    {p.name} ({p.barcode})
+                  </option>
+                ))}
+              </select>
+
+              <div className="relative w-full md:w-44">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-9 pr-4 text-xs outline-none focus:border-zinc-500 focus:bg-white transition-all text-zinc-900"
+                />
+                <svg className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
           </div>
 

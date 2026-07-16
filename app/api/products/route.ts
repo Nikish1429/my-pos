@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, category, price, stock_quantity } = body;
+    const { name, category, price, stock_quantity, barcode } = body;
 
     if (!name || !category || price === undefined || stock_quantity === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -41,6 +41,7 @@ export async function POST(request: Request) {
           category,
           price: Number(price),
           stock_quantity: Number(stock_quantity),
+          barcode: barcode || null,
         },
       ])
       .select();
@@ -63,7 +64,7 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json();
-    const { id, name, category, price, stock_quantity } = body;
+    const { id, name, category, price, stock_quantity, barcode } = body;
 
     if (!id || !name || !category || price === undefined || stock_quantity === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -76,6 +77,7 @@ export async function PUT(request: Request) {
         category,
         price: Number(price),
         stock_quantity: Number(stock_quantity),
+        barcode: barcode || undefined,
       })
       .eq("id", id)
       .select();

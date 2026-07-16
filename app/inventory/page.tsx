@@ -9,6 +9,7 @@ type Product = {
   category: string;
   price: number;
   stock_quantity: number;
+  barcode?: string;
 };
 
 export default function InventoryPage() {
@@ -29,6 +30,7 @@ export default function InventoryPage() {
   const [formCategory, setFormCategory] = useState("Drinks");
   const [formPrice, setFormPrice] = useState("");
   const [formStock, setFormStock] = useState("");
+  const [formBarcode, setFormBarcode] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -61,6 +63,7 @@ export default function InventoryPage() {
     setFormCategory("Drinks");
     setFormPrice("");
     setFormStock("");
+    setFormBarcode("");
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -72,6 +75,7 @@ export default function InventoryPage() {
     setFormCategory(product.category);
     setFormPrice(product.price.toString());
     setFormStock(product.stock_quantity.toString());
+    setFormBarcode(product.barcode || "");
     setFormError(null);
     setIsModalOpen(true);
   };
@@ -95,8 +99,8 @@ export default function InventoryPage() {
       const url = "/api/products";
       const method = editingProduct ? "PUT" : "POST";
       const body = editingProduct
-        ? { id: editingProduct.id, name: formName, category: formCategory, price: priceNum, stock_quantity: stockNum }
-        : { name: formName, category: formCategory, price: priceNum, stock_quantity: stockNum };
+        ? { id: editingProduct.id, name: formName, category: formCategory, price: priceNum, stock_quantity: stockNum, barcode: formBarcode || null }
+        : { name: formName, category: formCategory, price: priceNum, stock_quantity: stockNum, barcode: formBarcode || null };
 
       const res = await fetch(url, {
         method,
@@ -331,6 +335,19 @@ export default function InventoryPage() {
                   placeholder="e.g. Caramel Macchiato"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
+                  className="mt-2 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:bg-white transition-all text-zinc-900"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  Barcode / QR Code
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 8901234567801"
+                  value={formBarcode}
+                  onChange={(e) => setFormBarcode(e.target.value)}
                   className="mt-2 w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm outline-none focus:border-zinc-500 focus:bg-white transition-all text-zinc-900"
                 />
               </div>

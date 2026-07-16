@@ -21,6 +21,7 @@ create table products (
   category text not null,
   price numeric(10, 2) not null,
   stock_quantity integer not null default 0,
+  barcode text unique,
   created_at timestamptz default now()
 );
 
@@ -90,37 +91,37 @@ insert into users (name, email, role) values
   ('Jack White', 'jack@mypos.com', 'cashier');
 
 -- Insert 30 products with realistic Indian Rupee (INR) prices (Chennai Cafe theme)
-insert into products (name, category, price, stock_quantity) values
-  ('Filter Coffee', 'Drinks', 60.00, 150),
-  ('Masala Chai', 'Drinks', 50.00, 200),
-  ('Ginger Cardamom Tea', 'Drinks', 55.00, 180),
-  ('Mango Lassi', 'Drinks', 120.00, 80),
-  ('Sweet Lassi', 'Drinks', 100.00, 85),
-  ('Badam Milk', 'Drinks', 90.00, 100),
-  ('Nannari Sarbath', 'Drinks', 70.00, 120),
-  ('Rose Milk', 'Drinks', 80.00, 110),
-  ('Fresh Lime Soda', 'Drinks', 90.00, 95),
-  ('Jigarthanda', 'Drinks', 140.00, 60),
-  ('Gulab Jamun (2 pcs)', 'Bakery', 70.00, 50),
-  ('Kaju Katli (4 pcs)', 'Bakery', 120.00, 40),
-  ('Rava Kesari', 'Bakery', 80.00, 45),
-  ('Mysore Pak', 'Bakery', 100.00, 55),
-  ('Medu Vada (2 pcs)', 'Bakery', 60.00, 120),
-  ('Dilpasand', 'Bakery', 90.00, 30),
-  ('Vegetable Puff', 'Bakery', 50.00, 70),
-  ('Egg Puff', 'Bakery', 60.00, 65),
-  ('Paneer Puff', 'Bakery', 70.00, 80),
-  ('Coconut Bun', 'Bakery', 40.00, 50),
-  ('Samosa (2 pcs)', 'Snacks', 40.00, 120),
-  ('Onion Pakoda', 'Snacks', 70.00, 90),
-  ('Pani Puri', 'Snacks', 80.00, 100),
-  ('Bhel Puri', 'Snacks', 90.00, 85),
-  ('Samosa Chat', 'Snacks', 110.00, 60),
-  ('Masala Puri', 'Snacks', 100.00, 65),
-  ('Pav Bhaji', 'Snacks', 130.00, 50),
-  ('Cheese Murukku Sandwich', 'Snacks', 120.00, 40),
-  ('Bread Omelette', 'Snacks', 90.00, 75),
-  ('Paneer Tikka Roll', 'Snacks', 150.00, 45);
+insert into products (name, category, price, stock_quantity, barcode) values
+  ('Filter Coffee', 'Drinks', 60.00, 150, '8901234567801'),
+  ('Masala Chai', 'Drinks', 50.00, 200, '8901234567802'),
+  ('Ginger Cardamom Tea', 'Drinks', 55.00, 180, '8901234567803'),
+  ('Mango Lassi', 'Drinks', 120.00, 80, '8901234567804'),
+  ('Sweet Lassi', 'Drinks', 100.00, 85, '8901234567805'),
+  ('Badam Milk', 'Drinks', 90.00, 100, '8901234567806'),
+  ('Nannari Sarbath', 'Drinks', 70.00, 120, '8901234567807'),
+  ('Rose Milk', 'Drinks', 80.00, 110, '8901234567808'),
+  ('Fresh Lime Soda', 'Drinks', 90.00, 95, '8901234567809'),
+  ('Jigarthanda', 'Drinks', 140.00, 60, '8901234567810'),
+  ('Gulab Jamun (2 pcs)', 'Bakery', 70.00, 50, '8901234567811'),
+  ('Kaju Katli (4 pcs)', 'Bakery', 120.00, 40, '8901234567812'),
+  ('Rava Kesari', 'Bakery', 80.00, 45, '8901234567813'),
+  ('Mysore Pak', 'Bakery', 100.00, 55, '8901234567814'),
+  ('Medu Vada (2 pcs)', 'Bakery', 60.00, 120, '8901234567815'),
+  ('Dilpasand', 'Bakery', 90.00, 30, '8901234567816'),
+  ('Vegetable Puff', 'Bakery', 50.00, 70, '8901234567817'),
+  ('Egg Puff', 'Bakery', 60.00, 65, '8901234567818'),
+  ('Paneer Puff', 'Bakery', 70.00, 80, '8901234567819'),
+  ('Coconut Bun', 'Bakery', 40.00, 50, '8901234567820'),
+  ('Samosa (2 pcs)', 'Snacks', 40.00, 120, '8901234567821'),
+  ('Onion Pakoda', 'Snacks', 70.00, 90, '8901234567822'),
+  ('Pani Puri', 'Snacks', 80.00, 100, '8901234567823'),
+  ('Bhel Puri', 'Snacks', 90.00, 85, '8901234567824'),
+  ('Samosa Chat', 'Snacks', 110.00, 60, '8901234567825'),
+  ('Masala Puri', 'Snacks', 100.00, 65, '8901234567826'),
+  ('Pav Bhaji', 'Snacks', 130.00, 50, '8901234567827'),
+  ('Cheese Murukku Sandwich', 'Snacks', 120.00, 40, '8901234567828'),
+  ('Bread Omelette', 'Snacks', 90.00, 75, '8901234567829'),
+  ('Paneer Tikka Roll', 'Snacks', 150.00, 45, '8901234567830');
 
 -- -- Insert 30 customers (Indian Names & Chennai Addresses & Loyalty Program)
 insert into customers (name, phone, address, is_value_member, purchases_count) values
@@ -171,7 +172,7 @@ declare
   v_purchases_count integer;
   v_discount numeric(10, 2);
 begin
-  for i in 1..400 loop
+  for i in 1..2500 loop
     -- Random customer (80% chance of registered customer, 20% anonymous walk-in)
     if random() < 0.8 then
       select id, is_value_member, purchases_count into v_customer_id, v_is_value_member, v_purchases_count 

@@ -3,62 +3,17 @@
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-};
+import {
+  ShoppingCart,
+  History,
+  Box,
+  TrendingUp,
+  Brain,
+  Sparkles,
+} from "lucide-react";
 
 export default function Home() {
   const { user, role, userName, loading: authLoading, logout } = useAuth();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [productsError, setProductsError] = useState<string | null>(null);
-  const [loadingProducts, setLoadingProducts] = useState(false);
-
-  // Prediction states
-  const [prediction, setPrediction] = useState<number | null>(null);
-  const [loadingPrediction, setLoadingPrediction] = useState(false);
-  const [predictionError, setPredictionError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      const fetchProducts = async () => {
-        try {
-          setLoadingProducts(true);
-          const res = await fetch("/api/products");
-          if (!res.ok) {
-            throw new Error("Could not fetch products");
-          }
-          const data = await res.json();
-          setProducts(data.slice(0, 5)); // Just show a few sample products
-        } catch (err: any) {
-          setProductsError(err.message);
-        } finally {
-          setLoadingProducts(false);
-        }
-      };
-
-      const fetchPrediction = async () => {
-        try {
-          setLoadingPrediction(true);
-          const res = await fetch("/api/predict");
-          if (!res.ok) {
-            throw new Error("Could not fetch prediction");
-          }
-          const data = await res.json();
-          setPrediction(data.predictedSales);
-        } catch (err: any) {
-          setPredictionError(err.message);
-        } finally {
-          setLoadingPrediction(false);
-        }
-      };
-
-      fetchProducts();
-      fetchPrediction();
-    }
-  }, [user]);
 
   if (authLoading) {
     return (
@@ -118,13 +73,11 @@ export default function Home() {
               className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
             >
               <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
+                <ShoppingCart className="h-6 w-6" />
               </div>
               <div>
                 <p className="font-bold text-zinc-950 text-sm">Checkout Terminal</p>
-                <p className="text-2xs text-zinc-500 mt-0.5">Search products, manage carts, complete sales.</p>
+                <p className="text-2xs text-zinc-500 mt-0.5">Search products, scan barcodes, checkout sales.</p>
               </div>
             </Link>
 
@@ -133,9 +86,7 @@ export default function Home() {
               className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
             >
               <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
+                <History className="h-6 w-6" />
               </div>
               <div>
                 <p className="font-bold text-zinc-950 text-sm">Transaction Logs</p>
@@ -149,9 +100,7 @@ export default function Home() {
                 className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
               >
                 <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                  </svg>
+                  <Box className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="font-bold text-zinc-950 text-sm">Inventory Manager (Admin Only)</p>
@@ -161,9 +110,7 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-4 border border-zinc-200/60 rounded-xl p-5 bg-zinc-100/50">
                 <div className="rounded-lg bg-zinc-200 p-3 text-zinc-400">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                  <Box className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="font-bold text-zinc-400 text-sm">Inventory Manager (Admin Only)</p>
@@ -177,9 +124,7 @@ export default function Home() {
               className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
             >
               <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <TrendingUp className="h-6 w-6" />
               </div>
               <div>
                 <p className="font-bold text-zinc-950 text-sm">Store Analytics</p>
@@ -189,62 +134,28 @@ export default function Home() {
           </div>
         </div>
 
-        {/* AI Sales Forecast Card */}
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-sm font-bold text-zinc-950 tracking-wide uppercase border-b border-zinc-100 pb-3">
-            🧠 AI Sales Forecast
-          </h2>
-          <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-zinc-500">Predicted Revenue Tomorrow</p>
-              {loadingPrediction ? (
-                <div className="mt-2 h-9 w-32 animate-pulse rounded bg-zinc-100" />
-              ) : predictionError ? (
-                <p className="mt-2 text-xs text-red-500">⚠️ Error loading forecast: {predictionError}</p>
-              ) : (
-                <p className="mt-2 text-3xl font-extrabold text-zinc-900">
-                  ₹{prediction !== null ? prediction.toLocaleString() : "0.00"}
-                </p>
-              )}
-            </div>
-            <div className="max-w-md">
-              <p className="text-2xs text-zinc-600 leading-relaxed">
-                <b>Forecast Method:</b> 7-day Simple Moving Average (SMA). This model averages the daily total amounts of all recorded sales over the past 7 days to forecast tomorrow's sales.
-              </p>
+        {/* AI Sales Forecast Card -> Replaced with link to AI Assistant & Forecaster Page */}
+        <Link
+          href="/ai-manager"
+          className="block bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:border-zinc-500 hover:shadow-md transition-all group active:scale-[0.99]"
+        >
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+            <h2 className="text-xs font-extrabold text-zinc-950 tracking-wider uppercase flex items-center gap-2">
+              <Brain className="h-4.5 w-4.5 text-zinc-800 group-hover:animate-bounce" /> AI Store Assistant & forecasting
+            </h2>
+            <span className="flex items-center gap-1 text-3xs font-extrabold uppercase text-amber-500 group-hover:text-amber-600 transition-colors">
+              <Sparkles className="h-3 w-3 fill-amber-500" /> Co-Pilot Page →
+            </span>
+          </div>
+          <div className="mt-4 flex flex-col md:flex-row justify-between items-start gap-4 text-xs font-semibold text-zinc-600">
+            <p className="max-w-md leading-relaxed">
+              Launch our Next-Gen AI store cockpit. Ask natural-language queries about monthly earnings, access weekly product demand forecasting, flag anomaly transactions, and see smart stock alerts.
+            </p>
+            <div className="rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-2 text-2xs text-zinc-500 max-w-[200px] leading-snug">
+              📊 <b>Enabled Tools:</b> NLP Assistant, stockout predictions, anomaly logs, reorder recommendations.
             </div>
           </div>
-        </div>
-
-        {/* Database Quick Healthcheck Panel */}
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-          <h2 className="text-sm font-bold text-zinc-950 tracking-wide uppercase border-b border-zinc-100 pb-3">
-            Database Status & Sample Catalog
-          </h2>
-
-          <div className="mt-4">
-            {loadingProducts ? (
-              <div className="flex h-12 items-center justify-center">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-200 border-t-zinc-900" />
-              </div>
-            ) : productsError ? (
-              <p className="text-xs text-red-600">⚠️ Error loading catalog: {productsError}</p>
-            ) : (
-              <div>
-                <p className="text-2xs text-zinc-500 mb-2">Connected. Here are some catalog samples:</p>
-                <div className="flex flex-wrap gap-2">
-                  {products.map((p) => (
-                    <span
-                      key={p.id}
-                      className="inline-flex items-center gap-1 rounded bg-zinc-100 px-2.5 py-1 text-2xs font-semibold text-zinc-800 border border-zinc-200"
-                    >
-                      {p.name} (₹{Number(p.price).toFixed(2)})
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        </Link>
       </main>
     </div>
   );
