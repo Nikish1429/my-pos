@@ -16,6 +16,11 @@ export default function Home() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
+  // Prediction states
+  const [prediction, setPrediction] = useState<number | null>(null);
+  const [loadingPrediction, setLoadingPrediction] = useState(false);
+  const [predictionError, setPredictionError] = useState<string | null>(null);
+
   useEffect(() => {
     if (user) {
       const fetchProducts = async () => {
@@ -34,7 +39,24 @@ export default function Home() {
         }
       };
 
+      const fetchPrediction = async () => {
+        try {
+          setLoadingPrediction(true);
+          const res = await fetch("/api/predict");
+          if (!res.ok) {
+            throw new Error("Could not fetch prediction");
+          }
+          const data = await res.json();
+          setPrediction(data.predictedSales);
+        } catch (err: any) {
+          setPredictionError(err.message);
+        } finally {
+          setLoadingPrediction(false);
+        }
+      };
+
       fetchProducts();
+      fetchPrediction();
     }
   }, [user]);
 
@@ -149,6 +171,32 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* AI Sales Forecast Card */}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
+          <h2 className="text-sm font-bold text-zinc-950 tracking-wide uppercase border-b border-zinc-100 pb-3">
+            🧠 AI Sales Forecast
+          </h2>
+          <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-zinc-500">Predicted Revenue Tomorrow</p>
+              {loadingPrediction ? (
+                <div className="mt-2 h-9 w-32 animate-pulse rounded bg-zinc-100" />
+              ) : predictionError ? (
+                <p className="mt-2 text-xs text-red-500">⚠️ Error loading forecast: {predictionError}</p>
+              ) : (
+                <p className="mt-2 text-3xl font-extrabold text-zinc-900">
+                  ₹{prediction !== null ? prediction.toLocaleString() : "0.00"}
+                </p>
+              )}
+            </div>
+            <div className="max-w-md">
+              <p className="text-2xs text-zinc-600 leading-relaxed">
+                <b>Forecast Method:</b> 7-day Simple Moving Average (SMA). This model averages the daily total amounts of all recorded sales over the past 7 days to forecast tomorrow's sales.
+              </p>
+            </div>
           </div>
         </div>
 

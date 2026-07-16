@@ -34,6 +34,11 @@ export default function BillingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Recommendations state
+  const [lastAddedProductId, setLastAddedProductId] = useState<number | null>(null);
+  const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+
   // Receipt modal state
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [completedSale, setCompletedSale] = useState<{
@@ -73,8 +78,30 @@ export default function BillingPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (lastAddedProductId) {
+      const fetchRecommendations = async () => {
+        try {
+          setLoadingRecommendations(true);
+          const res = await fetch(`/api/recommend?id=${lastAddedProductId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setRecommendations(data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch recommendations:", err);
+        } finally {
+          setLoadingRecommendations(false);
+        }
+      };
+
+      fetchRecommendations();
+    }
+  }, [lastAddedProductId]);
+
   // Cart Actions
   const addToCart = (product: Product) => {
+    setLastAddedProductId(product.id);
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.product.id === product.id);
       const currentQty = existing ? existing.quantity : 0;
@@ -340,6 +367,34 @@ export default function BillingPage() {
               </div>
             )}
           </div>
+
+          {/* Recommendations Banner */}
+          {recommendations.length > 0 && (
+            <div className="mt-6 border-t border-zinc-100 pt-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2.5 flex items-center gap-1.5">
+                <span>💡</span> Frequently Bought Together
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                {recommendations.map((prod) => {
+                  const isOutOfStock = prod.stock_quantity === 0;
+                  return (
+                    <button
+                      key={prod.id}
+                      onClick={() => addToCart(prod)}
+                      disabled={isOutOfStock}
+                      className={`flex flex-col text-left border border-zinc-200 rounded-lg p-3 hover:border-zinc-400 bg-white transition-all shadow-sm active:scale-[0.98] ${
+                        isOutOfStock ? "opacity-50 cursor-not-allowed bg-zinc-50" : ""
+                      }`}
+                    >
+                      <span className="text-3xs text-zinc-400 uppercase tracking-wider">{prod.category}</span>
+                      <span className="font-bold text-zinc-800 text-xs mt-1 truncate w-full">{prod.name}</span>
+                      <span className="text-xs font-extrabold text-zinc-900 mt-2">₹{Number(prod.price).toFixed(2)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Side: Shopping Cart Summary */}
