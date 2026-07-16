@@ -13,7 +13,6 @@ import {
   Loader2,
   Send,
   Sparkles,
-  Search,
 } from "lucide-react";
 
 interface CustomerJoin {
@@ -58,7 +57,7 @@ export default function AIManagerPage() {
   const [chatLog, setChatLog] = useState<{ role: "user" | "assistant"; text: string }[]>([
     {
       role: "assistant",
-      text: "Hello! I am your AI Store Manager Assistant. You can ask me natural language queries about your sales history like:\n- 'Which product sold the most this month?'\n- 'Show total revenue in June'\n- 'What is our best selling category?'\n- 'Show our top customer'",
+      text: "Hello! I am the my-POS Intelligence Assistant. You can ask me natural language queries about your sales history, or ask me to perform math calculations/averages related to your data! Try asking:\n- 'Calculate 10% of 25000'\n- 'What is our total revenue?'\n- 'Which product sold the most this month?'\n- 'Show revenue in June'\n- 'How many sales total?'",
     },
   ]);
 
@@ -143,7 +142,7 @@ export default function AIManagerPage() {
     };
   }, [rawData]);
 
-  // --- AI CHAT NLP PROCESSOR ---
+  // --- AI CHAT NLP & MATH PROCESSOR ---
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim() || !rawData) return;
@@ -152,24 +151,43 @@ export default function AIManagerPage() {
     setQuery("");
     setChatLog((prev) => [...prev, { role: "user", text: userMsg }]);
 
-    // Simulated NLP Processor
-    let reply = "I'm sorry, I couldn't compute that answer. Try asking for: 'most sold product this month', 'revenue in June', or 'top customer'.";
-    const normalized = userMsg.toLowerCase();
-
     const { sales, saleItems } = rawData;
+    const normalized = userMsg.toLowerCase();
+    let reply = "I'm sorry, I couldn't compute that answer. Try asking for: 'most sold product this month', 'revenue in June', or 'top customer'.";
 
-    if (normalized.includes("product") && (normalized.includes("most") || normalized.includes("best") || normalized.includes("sold"))) {
-      // Find top selling product
-      const productQtyMap: { [key: string]: number } = {};
-      saleItems.forEach((item) => {
-        const prodName = item.products?.name || "Unknown Product";
-        productQtyMap[prodName] = (productQtyMap[prodName] || 0) + item.quantity;
-      });
-      const sorted = Object.keys(productQtyMap).sort((a, b) => productQtyMap[b] - productQtyMap[a]);
-      if (sorted.length > 0) {
-        reply = `☕ The best-selling product overall is **${sorted[0]}** with a total of **${productQtyMap[sorted[0]]} units** sold.`;
+    // 1. Math Calculation Engine
+    const isMathExpression = /[\d]+/.test(normalized) && (
+      normalized.includes("+") || 
+      normalized.includes("-") || 
+      normalized.includes("*") || 
+      normalized.includes("/") || 
+      normalized.includes("of") || 
+      normalized.includes("percent") || 
+      normalized.includes("%")
+    );
+
+    if (isMathExpression) {
+      try {
+        if (normalized.includes("of") && (normalized.includes("%") || normalized.includes("percent"))) {
+          const parts = normalized.match(/(\d+(?:\.\d+)?)\s*(?:%|percent)\s+of\s+(\d+(?:\.\d+)?)/);
+          if (parts) {
+            const pct = parseFloat(parts[1]);
+            const val = parseFloat(parts[2]);
+            reply = `🧮 **Calculation**: ${pct}% of ${val} = **₹${((pct / 100) * val).toFixed(2)}**`;
+          }
+        } else {
+          const expression = normalized.replace(/[^-()\d/*+.]/g, "");
+          if (expression.length > 0) {
+            const result = new Function(`return (${expression})`)();
+            reply = `🧮 **Calculation Result**: ${expression} = **${result.toLocaleString(undefined, { maximumFractionDigits: 2 })}**`;
+          }
+        }
+      } catch (err) {
+        reply = "I attempted to compute that mathematical query but encountered a format error. Please try a simple expression like '1500 * 0.10' or '250 + 60'.";
       }
-    } else if (normalized.includes("revenue") || normalized.includes("sales")) {
+    } 
+    // 2. Total sales / revenue query
+    else if (normalized.includes("revenue") || normalized.includes("sales") || normalized.includes("earnings")) {
       const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
       const shortMonths = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
       
@@ -191,21 +209,42 @@ export default function AIManagerPage() {
         const total = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
         reply = `📈 Our overall total revenue recorded across all databases is **₹${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}**.`;
       }
-    } else if (normalized.includes("customer")) {
-      const customerSpendingMap: { [key: string]: number } = {};
-      sales.forEach((s) => {
-        const custName = s.customers?.name || "Walk-in Guest";
-        if (custName !== "Walk-in Guest") {
-          customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
-        }
+    } 
+    // 3. Most sold product query
+    else if (normalized.includes("product") && (normalized.includes("most") || normalized.includes("best") || normalized.includes("sold") || normalized.includes("popular"))) {
+      const productQtyMap: { [key: string]: number } = {};
+      saleItems.forEach((item) => {
+        const prodName = item.products?.name || "Unknown Product";
+        productQtyMap[prodName] = (productQtyMap[prodName] || 0) + item.quantity;
       });
-      const sortedCust = Object.keys(customerSpendingMap).sort((a, b) => customerSpendingMap[b] - customerSpendingMap[a]);
-      if (sortedCust.length > 0) {
-        reply = `👤 Our highest spending loyalty member is **${sortedCust[0]}**, having spent a total of **₹${customerSpendingMap[sortedCust[0]].toLocaleString(undefined, { minimumFractionDigits: 2 })}** at our terminal.`;
-      } else {
-        reply = "No registered loyalty members found in our current sales logs.";
+      const sorted = Object.keys(productQtyMap).sort((a, b) => productQtyMap[b] - productQtyMap[a]);
+      if (sorted.length > 0) {
+        reply = `☕ The best-selling product overall is **${sorted[0]}** with a total of **${productQtyMap[sorted[0]]} units** sold.`;
       }
-    } else if (normalized.includes("category")) {
+    } 
+    // 4. Customer spending query
+    else if (normalized.includes("customer") || normalized.includes("member")) {
+      if (normalized.includes("how many") || normalized.includes("number of")) {
+        const distinctCustomers = new Set(sales.filter(s => s.customer_id).map(s => s.customer_id)).size;
+        reply = `👤 There are **${distinctCustomers} registered customers** who have placed orders in our system.`;
+      } else {
+        const customerSpendingMap: { [key: string]: number } = {};
+        sales.forEach((s) => {
+          const custName = s.customers?.name || "Walk-in Guest";
+          if (custName !== "Walk-in Guest") {
+            customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
+          }
+        });
+        const sortedCust = Object.keys(customerSpendingMap).sort((a, b) => customerSpendingMap[b] - customerSpendingMap[a]);
+        if (sortedCust.length > 0) {
+          reply = `👤 Our highest spending loyalty member is **${sortedCust[0]}**, having spent a total of **₹${customerSpendingMap[sortedCust[0]].toLocaleString(undefined, { minimumFractionDigits: 2 })}** at our terminal.`;
+        } else {
+          reply = "No registered loyalty members found in our current sales logs.";
+        }
+      }
+    } 
+    // 5. Category query
+    else if (normalized.includes("category")) {
       const catRevenueMap: { [key: string]: number } = {};
       saleItems.forEach((item) => {
         const catName = item.products?.category || "Other";
@@ -215,19 +254,29 @@ export default function AIManagerPage() {
       if (sortedCat.length > 0) {
         reply = `🛍️ The highest revenue generating product category is **${sortedCat[0]}**, contributing **₹${catRevenueMap[sortedCat[0]].toLocaleString(undefined, { minimumFractionDigits: 2 })}** to our store.`;
       }
+    } 
+    // 6. Transaction count queries
+    else if (normalized.includes("how many sales") || normalized.includes("number of sales") || normalized.includes("total orders") || normalized.includes("transaction")) {
+      reply = `📊 There are currently **${sales.length} transactions** recorded in the database.`;
+    } 
+    // 7. Average transaction value queries
+    else if (normalized.includes("average order") || normalized.includes("average sale") || normalized.includes("average ticket")) {
+      const totalRev = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      const avg = totalRev / (sales.length || 1);
+      reply = `📈 The average transaction value is **₹${avg.toFixed(2)}**.`;
     }
 
     setTimeout(() => {
       setChatLog((prev) => [...prev, { role: "assistant", text: reply }]);
-    }, 400);
+    }, 300);
   };
 
   if (authLoading || loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 font-sans">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-950" />
-        <p className="mt-2.5 text-xs text-zinc-500 font-semibold uppercase tracking-wider">
-          Connecting AI Store Manager models...
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <p className="mt-2.5 text-xs text-zinc-500 font-bold uppercase tracking-wider">
+          Connecting my-POS Intelligence Models...
         </p>
       </div>
     );
@@ -248,7 +297,7 @@ export default function AIManagerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 flex flex-col font-sans">
       {/* Top Navbar */}
       <nav className="border-b border-zinc-200 bg-white px-6 py-4 shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -259,10 +308,10 @@ export default function AIManagerPage() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <span className="text-lg font-extrabold tracking-tight text-zinc-950">AI Store Manager Dashboard</span>
+            <span className="text-lg font-black tracking-tight text-zinc-950">my-POS Intelligence Dashboard</span>
           </div>
-          <span className="flex items-center gap-1.5 rounded-full bg-zinc-900 px-3 py-1 text-4xs font-black uppercase text-white tracking-widest">
-            <Sparkles className="h-3 w-3 text-amber-300 fill-amber-300" /> AI Co-Pilot Active
+          <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-3.5 py-1.5 text-4xs font-black uppercase text-white tracking-widest shadow-sm">
+            <Sparkles className="h-3 w-3 text-amber-300 fill-amber-300 animate-pulse" /> my-POS Intelligence Active
           </span>
         </div>
       </nav>
@@ -274,9 +323,9 @@ export default function AIManagerPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Card 1: Demand Forecasting & stockout alerts */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-3 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-zinc-800" /> Product Demand Forecasting & Safety Stock
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-emerald-500 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-xs font-black uppercase tracking-wider text-emerald-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-emerald-600" /> Product Demand Forecasting & Safety Stock
             </h2>
             <div className="mt-4 overflow-x-auto">
               <table className="min-w-full text-left text-2xs divide-y divide-zinc-200 font-medium">
@@ -313,20 +362,20 @@ export default function AIManagerPage() {
           </div>
 
           {/* Card 2: Anomaly Detection List */}
-          <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-            <h2 className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-3 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-zinc-800" /> Real-time Anomaly & Suspicious Activity Logs
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-red-500 rounded-2xl p-6 shadow-sm">
+            <h2 className="text-xs font-black uppercase tracking-wider text-red-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-600" /> Real-time Anomaly & Suspicious Activity Logs
             </h2>
             <div className="mt-4 space-y-3">
               {aiInsights.anomalies.map((a, idx) => (
-                <div key={idx} className="flex justify-between items-start border border-zinc-200 rounded-xl p-3.5 bg-zinc-50/50 hover:bg-zinc-50 transition-all">
+                <div key={idx} className="flex justify-between items-start border border-red-100 rounded-xl p-3.5 bg-red-50/10 hover:bg-red-50/20 transition-all">
                   <div className="space-y-1">
                     <p className="font-extrabold text-xs text-zinc-950">Receipt ID: #{a.id}</p>
                     <p className="text-3xs text-zinc-500 font-semibold uppercase">Customer: {a.customer} • Date: {a.date}</p>
                   </div>
                   <div className="text-right space-y-1">
                     <p className="font-black text-xs text-zinc-900">₹{a.total}</p>
-                    <span className="inline-block text-4xs font-black uppercase text-red-600 bg-red-50 border border-red-200 rounded px-1.5 py-0.5">
+                    <span className="inline-block text-4xs font-black uppercase text-red-600 bg-red-100 border border-red-200 rounded px-1.5 py-0.5">
                       {a.reason}
                     </span>
                   </div>
@@ -338,24 +387,24 @@ export default function AIManagerPage() {
           {/* Card 3: Smart Inventory Alerts (Reorder Suggestion) */}
           <div className="grid gap-6 md:grid-cols-2">
             {/* Fast Moving */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-2xs font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
-                <Zap className="h-3.5 w-3.5 text-zinc-800" /> Fast-Moving Products
+            <div className="bg-white border border-zinc-200 border-t-4 border-t-cyan-500 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-2xs font-black uppercase tracking-wider text-cyan-800 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-cyan-600" /> Fast-Moving Products
               </h3>
               <ul className="space-y-2">
                 {aiInsights.fastMoving.map((p, idx) => (
                   <li key={idx} className="flex justify-between items-center text-xs font-semibold text-zinc-800">
                     <span>{p.name}</span>
-                    <span className="text-2xs text-zinc-500 font-bold bg-zinc-100 px-2 py-0.5 rounded-full">{p.nextWeekForecast} sold / wk</span>
+                    <span className="text-2xs text-cyan-700 font-extrabold bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-100">{p.nextWeekForecast} sold / wk</span>
                   </li>
                 ))}
               </ul>
             </div>
             
             {/* Slow Moving */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-2xs font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-zinc-400" /> Slow-Moving Products
+            <div className="bg-white border border-zinc-200 border-t-4 border-t-amber-500 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-2xs font-black uppercase tracking-wider text-amber-800 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
+                <AlertTriangle className="h-3.5 w-3.5 text-amber-600" /> Slow-Moving Products
               </h3>
               <ul className="space-y-2">
                 {aiInsights.slowMoving.map((p, idx) => (
@@ -371,9 +420,9 @@ export default function AIManagerPage() {
         </div>
 
         {/* Right 1 Column: AI Chat Assistant */}
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col h-[calc(100vh-140px)]">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 border-b border-zinc-100 pb-3 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-zinc-800" /> AI Natural Language Assistant
+        <div className="bg-gradient-to-br from-indigo-950 via-zinc-900 to-zinc-950 border border-indigo-500/20 rounded-3xl p-6 shadow-xl flex flex-col h-[calc(100vh-140px)] text-white">
+          <h2 className="text-xs font-black uppercase tracking-widest text-amber-300 border-b border-white/10 pb-3 flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-indigo-300" /> POS Intelligence Assistant
           </h2>
 
           {/* Chat log messages area */}
@@ -381,10 +430,10 @@ export default function AIManagerPage() {
             {chatLog.map((log, idx) => (
               <div
                 key={idx}
-                className={`flex flex-col rounded-2xl p-3.5 shadow-sm max-w-[90%] ${
+                className={`flex flex-col rounded-2xl p-3.5 shadow-md max-w-[85%] ${
                   log.role === "user"
-                    ? "bg-zinc-900 text-white self-end ml-auto"
-                    : "bg-zinc-100 text-zinc-800 self-start mr-auto border border-zinc-200"
+                    ? "bg-white text-zinc-950 self-end ml-auto"
+                    : "bg-indigo-900/50 border border-indigo-500/30 text-zinc-100 self-start mr-auto"
                 }`}
               >
                 <p className="whitespace-pre-wrap">{log.text}</p>
@@ -393,17 +442,17 @@ export default function AIManagerPage() {
           </div>
 
           {/* Chat Form */}
-          <form onSubmit={handleChatSubmit} className="mt-4 pt-3 border-t border-zinc-100 flex gap-2">
+          <form onSubmit={handleChatSubmit} className="mt-4 pt-3 border-t border-white/10 flex gap-2">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask AI, e.g. 'Show revenue in June'"
-              className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-3.5 py-2 text-2xs outline-none focus:border-zinc-500 focus:bg-white text-zinc-900 font-semibold"
+              placeholder="Ask math or metrics, e.g. '1500 * 0.10'"
+              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-2xs outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-semibold"
             />
             <button
               type="submit"
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm hover:bg-zinc-800 transition-all active:scale-95"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 transition-all active:scale-95"
             >
               <Send className="h-3.5 w-3.5" />
             </button>
