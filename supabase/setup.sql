@@ -86,32 +86,32 @@ insert into users (name, email, role) values
   ('Ivy Jackson', 'ivy@mypos.com', 'cashier'),
   ('Jack White', 'jack@mypos.com', 'cashier');
 
--- Insert 24 products
+-- Insert 24 products with realistic Indian Rupee (INR) prices
 insert into products (name, category, price, stock_quantity) values
-  ('Espresso', 'Drinks', 2.50, 100),
-  ('Cappuccino', 'Drinks', 3.75, 80),
-  ('Latte', 'Drinks', 4.00, 85),
-  ('Americano', 'Drinks', 3.00, 120),
-  ('Iced Tea', 'Drinks', 3.25, 90),
-  ('Lemonade', 'Drinks', 3.50, 75),
-  ('Hot Chocolate', 'Drinks', 4.25, 50),
-  ('Croissant', 'Bakery', 2.75, 40),
-  ('Chocolate Muffin', 'Bakery', 3.00, 35),
-  ('Blueberry Scone', 'Bakery', 3.25, 30),
-  ('Bagel with Cream Cheese', 'Bakery', 3.50, 25),
-  ('Chocolate Chip Cookie', 'Bakery', 2.00, 60),
-  ('Brownie', 'Bakery', 2.50, 45),
-  ('Apple Danish', 'Bakery', 3.25, 20),
-  ('Club Sandwich', 'Snacks', 7.50, 20),
-  ('Chicken Wrap', 'Snacks', 6.99, 25),
-  ('Caprese Panini', 'Snacks', 8.25, 15),
-  ('Potato Chips', 'Snacks', 1.75, 100),
-  ('Pretzels', 'Snacks', 2.00, 80),
-  ('Mixed Nuts', 'Snacks', 3.50, 50),
-  ('Popcorn', 'Snacks', 2.25, 60),
-  ('Fruit Salad', 'Snacks', 4.50, 15),
-  ('Granola Bar', 'Snacks', 1.50, 90),
-  ('Greek Yogurt', 'Snacks', 2.75, 40);
+  ('Espresso', 'Drinks', 120.00, 100),
+  ('Cappuccino', 'Drinks', 180.00, 80),
+  ('Latte', 'Drinks', 190.00, 85),
+  ('Americano', 'Drinks', 140.00, 120),
+  ('Iced Tea', 'Drinks', 130.00, 90),
+  ('Lemonade', 'Drinks', 110.00, 75),
+  ('Hot Chocolate', 'Drinks', 220.00, 50),
+  ('Croissant', 'Bakery', 120.00, 40),
+  ('Chocolate Muffin', 'Bakery', 140.00, 35),
+  ('Blueberry Scone', 'Bakery', 150.00, 30),
+  ('Bagel with Cream Cheese', 'Bakery', 160.00, 25),
+  ('Chocolate Chip Cookie', 'Bakery', 80.00, 60),
+  ('Brownie', 'Bakery', 120.00, 45),
+  ('Apple Danish', 'Bakery', 150.00, 20),
+  ('Club Sandwich', 'Snacks', 280.00, 20),
+  ('Chicken Wrap', 'Snacks', 240.00, 25),
+  ('Caprese Panini', 'Snacks', 320.00, 15),
+  ('Potato Chips', 'Snacks', 60.00, 100),
+  ('Pretzels', 'Snacks', 80.00, 80),
+  ('Mixed Nuts', 'Snacks', 180.00, 50),
+  ('Popcorn', 'Snacks', 90.00, 60),
+  ('Fruit Salad', 'Snacks', 150.00, 15),
+  ('Granola Bar', 'Snacks', 50.00, 90),
+  ('Greek Yogurt', 'Snacks', 120.00, 40);
 
 -- Insert 30 customers
 insert into customers (name, phone, region) values
