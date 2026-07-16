@@ -17,6 +17,7 @@ import {
   Calendar,
   Filter,
   RefreshCw,
+  MousePointerClick,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -82,7 +83,7 @@ export default function AnalyticsPage() {
 
   // Filters State
   const [timeRange, setTimeRange] = useState<string>("all"); // all, 30, 90, 180
-  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // All, North, South, East, West, Central, Walk-in
+  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // All, Delhi NCR, Maharashtra, Karnataka, West Bengal, Tamil Nadu, Walk-in
   const [selectedCategory, setSelectedCategory] = useState<string>("All"); // All, Drinks, Bakery, Snacks
 
   const fetchAnalytics = async () => {
@@ -203,7 +204,7 @@ export default function AnalyticsPage() {
 
     // 5. Group Revenue by Region (Bar Chart)
     const regionalRevenueMap: { [key: string]: number } = {};
-    const regionsList = ["North", "South", "East", "West", "Central", "Walk-in"];
+    const regionsList = ["Delhi NCR", "Maharashtra", "Karnataka", "West Bengal", "Tamil Nadu", "Walk-in"];
     regionsList.forEach((r) => (regionalRevenueMap[r] = 0));
 
     if (selectedCategory === "All") {
@@ -344,9 +345,15 @@ export default function AnalyticsPage() {
 
         {/* INTERACTIVE FILTERS CONTROLS PANEL */}
         <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-zinc-950 border-b border-zinc-100 pb-2.5">
-            <Filter className="h-4 w-4 text-zinc-500" />
-            <h2 className="text-xs font-extrabold uppercase tracking-wider">Interactive Report Filters</h2>
+          <div className="flex items-center justify-between border-b border-zinc-100 pb-2.5">
+            <div className="flex items-center gap-2 text-zinc-950">
+              <Filter className="h-4 w-4 text-zinc-500" />
+              <h2 className="text-xs font-extrabold uppercase tracking-wider">Interactive Report Filters</h2>
+            </div>
+            <div className="flex items-center gap-1 text-3xs font-semibold text-zinc-400">
+              <MousePointerClick className="h-3.5 w-3.5" />
+              <span>Tip: Click chart bars or pie slices to filter!</span>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             {/* Filter 1: Time Range */}
@@ -377,11 +384,11 @@ export default function AnalyticsPage() {
                 className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
               >
                 <option value="All">All Regions</option>
-                <option value="North">North</option>
-                <option value="South">South</option>
-                <option value="East">East</option>
-                <option value="West">West</option>
-                <option value="Central">Central</option>
+                <option value="Delhi NCR">Delhi NCR</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="West Bengal">West Bengal</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
                 <option value="Walk-in">Walk-in Customers</option>
               </select>
             </div>
@@ -488,10 +495,17 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Chart B: Revenue by Region (Bar) */}
+          {/* Chart B: Revenue by Region (Bar with Cross-Filtering) */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col">
-            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-100 pb-3 mb-4">
-              <MapPin className="h-4 w-4 text-zinc-500" /> Revenue by Region
+            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-zinc-500" /> Revenue by Region
+              </div>
+              {selectedRegion !== "All" && (
+                <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
+                  Filtered
+                </span>
+              )}
             </h3>
             <div className="h-72 w-full">
               {revenueByRegion.length === 0 ? (
@@ -507,8 +521,29 @@ export default function AnalyticsPage() {
                     <Tooltip
                       contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
                       itemStyle={{ color: "#fff" }}
+                      cursor={{ fill: "rgba(244, 244, 245, 0.5)" }}
                     />
-                    <Bar dataKey="revenue" fill="#18181b" radius={[6, 6, 0, 0]} name="Sales (₹)" />
+                    <Bar
+                      dataKey="revenue"
+                      fill="#71717a"
+                      radius={[6, 6, 0, 0]}
+                      name="Sales (₹)"
+                      style={{ cursor: "pointer" }}
+                      onClick={(data: any) => {
+                        const region = data?.region || data?.payload?.region;
+                        if (region) {
+                          setSelectedRegion(selectedRegion === region ? "All" : region);
+                        }
+                      }}
+                    >
+                      {revenueByRegion.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={selectedRegion === entry.region ? "#18181b" : "#71717a"}
+                          opacity={selectedRegion === "All" || selectedRegion === entry.region ? 1 : 0.4}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -545,10 +580,17 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          {/* Chart D: Category Split (Donut/Pie) */}
+          {/* Chart D: Category Split (Donut/Pie with Cross-Filtering) */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col">
-            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-100 pb-3 mb-4">
-              <PieIcon className="h-4 w-4 text-zinc-500" /> Sales by Category
+            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <PieIcon className="h-4 w-4 text-zinc-500" /> Sales by Category
+              </div>
+              {selectedCategory !== "All" && (
+                <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
+                  Filtered
+                </span>
+              )}
             </h3>
             <div className="h-52 w-full relative">
               {salesByCategory.length === 0 ? (
@@ -566,9 +608,20 @@ export default function AnalyticsPage() {
                       outerRadius={75}
                       paddingAngle={3}
                       dataKey="value"
+                      style={{ cursor: "pointer" }}
+                      onClick={(data: any) => {
+                        const name = data?.name || data?.payload?.name;
+                        if (name) {
+                          setSelectedCategory(selectedCategory === name ? "All" : name);
+                        }
+                      }}
                     >
                       {salesByCategory.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                          opacity={selectedCategory === "All" || selectedCategory === entry.name ? 1 : 0.35}
+                        />
                       ))}
                     </Pie>
                     <Tooltip
@@ -583,12 +636,18 @@ export default function AnalyticsPage() {
             {salesByCategory.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 justify-center text-3xs font-semibold text-zinc-600">
                 {salesByCategory.map((entry, index) => (
-                  <div key={entry.name} className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                    <span>
+                  <button
+                    key={entry.name}
+                    onClick={() => setSelectedCategory(selectedCategory === entry.name ? "All" : entry.name)}
+                    className={`flex items-center gap-1.5 hover:text-zinc-950 transition-colors ${
+                      selectedCategory !== "All" && selectedCategory !== entry.name ? "opacity-40" : ""
+                    }`}
+                  >
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[salesByCategory.indexOf(entry) % COLORS.length] }} />
+                    <span className={selectedCategory === entry.name ? "underline font-extrabold" : ""}>
                       {entry.name} ({kpis.totalRevenue > 0 ? ((entry.value / kpis.totalRevenue) * 100).toFixed(0) : 0}%)
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}

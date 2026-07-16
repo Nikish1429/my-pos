@@ -86,7 +86,7 @@ insert into users (name, email, role) values
   ('Ivy Jackson', 'ivy@mypos.com', 'cashier'),
   ('Jack White', 'jack@mypos.com', 'cashier');
 
--- Insert 24 products with realistic Indian Rupee (INR) prices
+-- Insert 30 products with realistic Indian Rupee (INR) prices
 insert into products (name, category, price, stock_quantity) values
   ('Espresso', 'Drinks', 120.00, 100),
   ('Cappuccino', 'Drinks', 180.00, 80),
@@ -95,6 +95,8 @@ insert into products (name, category, price, stock_quantity) values
   ('Iced Tea', 'Drinks', 130.00, 90),
   ('Lemonade', 'Drinks', 110.00, 75),
   ('Hot Chocolate', 'Drinks', 220.00, 50),
+  ('Masala Chai', 'Drinks', 50.00, 200),
+  ('Filter Coffee', 'Drinks', 60.00, 150),
   ('Croissant', 'Bakery', 120.00, 40),
   ('Chocolate Muffin', 'Bakery', 140.00, 35),
   ('Blueberry Scone', 'Bakery', 150.00, 30),
@@ -102,6 +104,8 @@ insert into products (name, category, price, stock_quantity) values
   ('Chocolate Chip Cookie', 'Bakery', 80.00, 60),
   ('Brownie', 'Bakery', 120.00, 45),
   ('Apple Danish', 'Bakery', 150.00, 20),
+  ('Gulab Jamun (2 pcs)', 'Bakery', 70.00, 50),
+  ('Kaju Katli (4 pcs)', 'Bakery', 120.00, 40),
   ('Club Sandwich', 'Snacks', 280.00, 20),
   ('Chicken Wrap', 'Snacks', 240.00, 25),
   ('Caprese Panini', 'Snacks', 320.00, 15),
@@ -111,40 +115,42 @@ insert into products (name, category, price, stock_quantity) values
   ('Popcorn', 'Snacks', 90.00, 60),
   ('Fruit Salad', 'Snacks', 150.00, 15),
   ('Granola Bar', 'Snacks', 50.00, 90),
-  ('Greek Yogurt', 'Snacks', 120.00, 40);
+  ('Greek Yogurt', 'Snacks', 120.00, 40),
+  ('Samosa (2 pcs)', 'Snacks', 40.00, 120),
+  ('Paneer Puff', 'Snacks', 60.00, 80);
 
--- Insert 30 customers
+-- Insert 30 customers (Indian Names & Regions)
 insert into customers (name, phone, region) values
-  ('John Doe', '555-0101', 'North'),
-  ('Jane Smith', '555-0102', 'North'),
-  ('Michael Johnson', '555-0103', 'South'),
-  ('Emily Davis', '555-0104', 'South'),
-  ('James Wilson', '555-0105', 'East'),
-  ('Sarah Martinez', '555-0106', 'East'),
-  ('Robert Anderson', '555-0107', 'West'),
-  ('Jessica Taylor', '555-0108', 'West'),
-  ('William Thomas', '555-0109', 'Central'),
-  ('Karen White', '555-0110', 'Central'),
-  ('Richard Harris', '555-0111', 'North'),
-  ('Susan Martin', '555-0112', 'South'),
-  ('Joseph Thompson', '555-0113', 'East'),
-  ('Thomas Garcia', '555-0114', 'West'),
-  ('Nancy Robinson', '555-0115', 'Central'),
-  ('Charles Clark', '555-0116', 'North'),
-  ('Sandra Lewis', '555-0117', 'South'),
-  ('Matthew Lee', '555-0118', 'East'),
-  ('Dorothy Walker', '555-0119', 'West'),
-  ('Andrew Hall', '555-0120', 'Central'),
-  ('Lisa Allen', '555-0121', 'North'),
-  ('Paul Young', '555-0122', 'South'),
-  ('Donna King', '555-0123', 'East'),
-  ('Steven Wright', '555-0124', 'West'),
-  ('Betty Lopez', '555-0125', 'Central'),
-  ('Daniel Hill', '555-0126', 'North'),
-  ('Margaret Scott', '555-0127', 'South'),
-  ('Kenneth Green', '555-0128', 'East'),
-  ('Ruth Adams', '555-0129', 'West'),
-  ('Joshua Baker', '555-0130', 'Central');
+  ('Aarav Sharma', '98100-12345', 'Delhi NCR'),
+  ('Aditya Patel', '98200-23456', 'Maharashtra'),
+  ('Vihaan Gupta', '98300-34567', 'Delhi NCR'),
+  ('Diya Iyer', '98400-45678', 'Tamil Nadu'),
+  ('Ananya Reddy', '98500-56789', 'Karnataka'),
+  ('Rahul Verma', '98600-67890', 'Delhi NCR'),
+  ('Priya Nair', '98700-78901', 'Karnataka'),
+  ('Amit Singh', '98800-89012', 'Delhi NCR'),
+  ('Rajesh Gupta', '98900-90123', 'West Bengal'),
+  ('Siddharth Malhotra', '98000-01234', 'Maharashtra'),
+  ('Neha Sharma', '98111-12345', 'Delhi NCR'),
+  ('Vikram Rao', '98222-23456', 'Karnataka'),
+  ('Sneha Iyer', '98333-34567', 'Tamil Nadu'),
+  ('Kabir Bose', '98444-45678', 'West Bengal'),
+  ('Rohan Deshmukh', '98555-56789', 'Maharashtra'),
+  ('Anjali Desai', '98666-67890', 'Maharashtra'),
+  ('Karan Johar', '98777-78901', 'Maharashtra'),
+  ('Divya Dutta', '98888-89012', 'Delhi NCR'),
+  ('Varun Dhawan', '98999-90123', 'Maharashtra'),
+  ('Alia Bhatt', '98000-11111', 'Maharashtra'),
+  ('Ranbir Kapoor', '98111-22222', 'Delhi NCR'),
+  ('Deepika Padukone', '98222-33333', 'Karnataka'),
+  ('Ranveer Singh', '98333-44444', 'Maharashtra'),
+  ('Katrina Kaif', '98444-55555', 'Delhi NCR'),
+  ('Vicky Kaushal', '98555-66666', 'Delhi NCR'),
+  ('Kiara Advani', '98666-77777', 'Maharashtra'),
+  ('Sidharth Malhotra', '98777-88888', 'Delhi NCR'),
+  ('Kriti Sanon', '98888-99999', 'Delhi NCR'),
+  ('Ayushmann Khurrana', '98999-00000', 'Delhi NCR'),
+  ('Kartik Aaryan', '98000-22222', 'Maharashtra');
 
 -- Generate 400 sales dynamically over the last 6 months
 do $$
