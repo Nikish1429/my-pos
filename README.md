@@ -52,10 +52,10 @@ Sign in directly on the [Login Screen](https://my-pos-lyart.vercel.app/login) us
 
 ```mermaid
 graph TD
-    classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px;
-    classDef server fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
-    classDef db fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
-    classDef bi fill:#fffbeb,stroke:#d97706,stroke-width:2px;
+    classDef client fill:#bae6fd,stroke:#0284c7,stroke-width:2px,color:#0f172a;
+    classDef server fill:#ddd6fe,stroke:#7c3aed,stroke-width:2px,color:#1e1b4b;
+    classDef db fill:#bbf7d0,stroke:#16a34a,stroke-width:2px,color:#064e3b;
+    classDef bi fill:#fef08a,stroke:#d97706,stroke-width:2px,color:#451a03;
 
     subgraph Client ["Client Side (Next.js SPA)"]
         UI["Web Interface (Tailwind CSS)"]:::client
