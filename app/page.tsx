@@ -143,25 +143,29 @@ export default function Home() {
           </div>
         </div>
 
-        {/* AI Sales Forecast Card -> Replaced with link to AI Assistant & Forecaster Page */}
         <Link
           href="/ai-manager"
-          className="block bg-gradient-to-br from-zinc-900 via-indigo-950 to-purple-950 border border-indigo-500/20 rounded-3xl p-7 shadow-lg hover:border-indigo-400 hover:shadow-xl transition-all group active:scale-[0.99]"
+          className="block bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-950 border border-indigo-500/30 rounded-3xl p-9 shadow-xl hover:border-indigo-400 hover:shadow-2xl transition-all group active:scale-[0.99] relative overflow-hidden"
         >
+          <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
-            <h2 className="text-xs font-black tracking-widest uppercase flex items-center gap-2 text-amber-300">
-              <Brain className="h-5 w-5 text-indigo-300 group-hover:animate-bounce" /> my-POS Intelligence Engine
+            <h2 className="text-sm font-black tracking-widest uppercase flex items-center gap-2.5 text-amber-300">
+              <Brain className="h-6 w-6 text-indigo-300 group-hover:animate-bounce" /> my-POS Intelligence Engine
             </h2>
-            <span className="flex items-center gap-1 text-3xs font-extrabold uppercase text-amber-400 group-hover:text-amber-300 transition-colors">
-              <Sparkles className="h-3 w-3 fill-amber-400" /> Start Co-Pilot →
+            <span className="flex items-center gap-1 text-2xs font-extrabold uppercase text-amber-400 group-hover:text-amber-300 transition-colors">
+              <Sparkles className="h-3.5 w-3.5 fill-amber-400" /> Start Engine →
             </span>
           </div>
-          <div className="mt-5 flex flex-col md:flex-row justify-between items-start gap-4 text-xs font-semibold text-zinc-300">
-            <p className="max-w-md leading-relaxed">
+          <div className="mt-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-6">
+            <p className="max-w-md text-sm text-zinc-100/90 leading-relaxed font-semibold">
               Launch our Next-Gen AI store cockpit. Ask natural-language queries about monthly earnings, access weekly product demand forecasting, flag anomaly transactions, and see smart stock alerts.
             </p>
-            <div className="rounded-xl bg-white/10 border border-white/10 px-4 py-3 text-2xs text-zinc-100 max-w-[220px] leading-snug">
-              📊 <b>Enabled Tools:</b> NLP Assistant, stockout predictions, anomaly logs, reorder recommendations.
+            <div className="rounded-2xl bg-white/5 border border-white/10 p-5 text-2xs text-zinc-100/90 w-full md:w-64 space-y-1.5 shadow-inner">
+              <p className="font-extrabold uppercase tracking-wider text-amber-300 mb-2">⚡ Engine Capabilities</p>
+              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> NLP Store Chatbot</div>
+              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Demand Forecasts</div>
+              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Anomaly Auditor</div>
+              <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Smart Restock Alerts</div>
             </div>
           </div>
         </Link>

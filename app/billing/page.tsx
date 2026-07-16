@@ -425,12 +425,12 @@ export default function BillingPage() {
                           : "hover:shadow-md"
                       }`}
                     >
-                      <span className={`inline-flex self-start rounded-full px-2 py-0.5 text-4xs font-black uppercase tracking-wider ${
+                      <span className={`inline-flex self-start rounded-full px-2.5 py-0.5 text-4xs font-black uppercase tracking-wider ${
                         product.category === "Drinks"
-                          ? "bg-blue-50 text-blue-750 border border-blue-200"
+                          ? "bg-blue-100 text-blue-900 border border-blue-200"
                           : product.category === "Bakery"
-                          ? "bg-purple-50 text-purple-750 border border-purple-200"
-                          : "bg-amber-50 text-amber-755 border border-amber-200"
+                          ? "bg-purple-100 text-purple-900 border border-purple-200"
+                          : "bg-amber-100 text-amber-950 border border-amber-250"
                       }`}>
                         {product.category}
                       </span>
