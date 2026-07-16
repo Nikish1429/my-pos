@@ -145,20 +145,20 @@ export default function LoginPage() {
         {/* Demo Accounts Details Block */}
         <div className="mt-8 rounded-2xl bg-white/5 p-4.5 text-3xs text-white/80 border border-white/5 leading-relaxed">
           <p className="font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wide">
-            🔑 Demo Operator Credentials:
+            🔑 Operator Sign-In Details:
           </p>
           <ul className="mt-2 space-y-1 font-semibold">
             <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
               <span>Admin:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">admin@mypos.com</code>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">nikishkumaranr@gmail.com</code>
             </li>
             <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
               <span>Cashier:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">cashier@mypos.com</code>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">nikishkumaran5@gmail.com</code>
             </li>
             <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
               <span>Password:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">password123</code>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded italic">Set by you in Supabase</code>
             </li>
           </ul>
         </div>
