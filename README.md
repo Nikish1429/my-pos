@@ -11,12 +11,26 @@ A premium, full-stack Next.js and Supabase-powered Point of Sale (POS) system de
 
 <table>
   <tr>
-    <td align="center"><b>Sunset Login & Operator Credentials</b></td>
-    <td align="center"><b>Retail Intelligence Cockpit & Chatbot</b></td>
+    <td align="center"><b>🌅 Sunset Login Screen</b></td>
+    <td align="center"><b>💻 Operator Dashboard</b></td>
   </tr>
   <tr>
     <td><img src="public/screenshots/login.png" alt="Login Page" width="400"/></td>
-    <td><img src="public/screenshots/cockpit.png" alt="Intelligence Cockpit" width="400"/></td>
+    <td><img src="public/screenshots/dashboard.png" alt="Dashboard" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>🛒 Checkout & Billing Terminal</b></td>
+    <td align="center"><b>📜 Transaction History Logs</b></td>
+  </tr>
+  <tr>
+    <td><img src="public/screenshots/checkout.png" alt="Checkout Terminal" width="400"/></td>
+    <td><img src="public/screenshots/history.png" alt="Transaction History" width="400"/></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><b>🤖 Cockpit Control & Live Chatbot</b></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="public/screenshots/cockpit.png" alt="Cockpit & Chatbot" width="600"/></td>
   </tr>
 </table>
 
