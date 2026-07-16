@@ -10,7 +10,6 @@ id,name,category,price,stock_quantity
 11,"Bagel with Cream Cheese","Bakery",160,25
 12,"Chocolate Chip Cookie","Bakery",80,60
 15,"Club Sandwich","Snacks",280,20
-16,"Chicken Wrap","Snacks",240,25
 17,"Caprese Panini","Snacks",320,15
 18,"Potato Chips","Snacks",60,100
 19,"Pretzels","Snacks",80,80
@@ -20,6 +19,7 @@ id,name,category,price,stock_quantity
 23,"Granola Bar","Snacks",50,90
 24,"Greek Yogurt","Snacks",120,40
 14,"Apple Danish","Bakery",150,19
-13,"Brownie","Bakery",120,44
 2,"Cappuccino","Drinks",180,79
 4,"Americano","Drinks",140,1
+13,"Brownie","Bakery",120,43
+16,"Chicken Wrap","Snacks",240,24

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
         id,
         total_amount,
         sale_date,
-        customer:customers(name),
+        customer:customers(id, name, phone, address),
         user:users(name),
         sale_items(
           id,
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       id,
       total_amount,
       sale_date,
-      customer:customers(name),
+      customer:customers(id, name, phone, address),
       user:users(name)
     `)
     .order("sale_date", { ascending: false });

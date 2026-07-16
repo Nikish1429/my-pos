@@ -11,7 +11,7 @@ export async function GET() {
     // 1. Fetch all raw sales
     const { data: sales, error: salesErr } = await supabase
       .from("sales")
-      .select("id, total_amount, sale_date, customer_id, user_id, customers(name, region), users(name)");
+      .select("id, total_amount, sale_date, customer_id, user_id, customers(id, name, address), users(name)");
 
     if (salesErr || !sales) {
       throw salesErr || new Error("Failed to fetch sales");

@@ -29,7 +29,7 @@ create table customers (
   id bigint generated always as identity primary key,
   name text not null,
   phone text,
-  region text not null,
+  address text not null,
   created_at timestamptz default now()
 );
 
@@ -119,38 +119,38 @@ insert into products (name, category, price, stock_quantity) values
   ('Samosa (2 pcs)', 'Snacks', 40.00, 120),
   ('Paneer Puff', 'Snacks', 60.00, 80);
 
--- Insert 30 customers (Indian Names & Chennai Places)
-insert into customers (name, phone, region) values
-  ('Aarav Sharma', '98100-12345', 'Adyar'),
-  ('Aditya Patel', '98200-23456', 'T. Nagar'),
-  ('Vihaan Gupta', '98300-34567', 'Velachery'),
-  ('Diya Iyer', '98400-45678', 'Mylapore'),
-  ('Ananya Reddy', '98500-56789', 'Anna Nagar'),
-  ('Rahul Verma', '98600-67890', 'Adyar'),
-  ('Priya Nair', '98700-78901', 'Velachery'),
-  ('Amit Singh', '98800-89012', 'T. Nagar'),
-  ('Rajesh Gupta', '98900-90123', 'Mylapore'),
-  ('Siddharth Malhotra', '98000-01234', 'Anna Nagar'),
-  ('Neha Sharma', '98111-12345', 'Adyar'),
-  ('Vikram Rao', '98222-23456', 'Velachery'),
-  ('Sneha Iyer', '98333-34567', 'Mylapore'),
-  ('Kabir Bose', '98444-45678', 'T. Nagar'),
-  ('Rohan Deshmukh', '98555-56789', 'Anna Nagar'),
-  ('Anjali Desai', '98666-67890', 'Adyar'),
-  ('Karan Johar', '98777-78901', 'T. Nagar'),
-  ('Divya Dutta', '98888-89012', 'Velachery'),
-  ('Varun Dhawan', '98999-90123', 'Mylapore'),
-  ('Alia Bhatt', '98000-11111', 'Anna Nagar'),
-  ('Ranbir Kapoor', '98111-22222', 'Adyar'),
-  ('Deepika Padukone', '98222-33333', 'Velachery'),
-  ('Ranveer Singh', '98333-44444', 'T. Nagar'),
-  ('Katrina Kaif', '98444-55555', 'Mylapore'),
-  ('Vicky Kaushal', '98555-66666', 'Anna Nagar'),
-  ('Kiara Advani', '98666-77777', 'Adyar'),
-  ('Sidharth Malhotra', '98777-88888', 'T. Nagar'),
-  ('Kriti Sanon', '98888-99999', 'Velachery'),
-  ('Ayushmann Khurrana', '98999-00000', 'Mylapore'),
-  ('Kartik Aaryan', '98000-22222', 'Anna Nagar');
+-- Insert 30 customers (Indian Names & Chennai Addresses)
+insert into customers (name, phone, address) values
+  ('Aarav Sharma', '98100-12345', '12, Kasturibai Nagar, Adyar, Chennai - 600020'),
+  ('Aditya Patel', '98200-23456', '45, Usman Road, T. Nagar, Chennai - 600017'),
+  ('Vihaan Gupta', '98300-34567', '78, 100 Feet Bypass Road, Velachery, Chennai - 600042'),
+  ('Diya Iyer', '98400-45678', '89, Kutchery Road, Mylapore, Chennai - 600004'),
+  ('Ananya Reddy', '98500-56789', '34, Shanthi Colony, Anna Nagar, Chennai - 600040'),
+  ('Rahul Verma', '98600-67890', '56, Gandhi Nagar Main Road, Adyar, Chennai - 600020'),
+  ('Priya Nair', '98700-78901', '102, Baby Nagar, Velachery, Chennai - 600042'),
+  ('Amit Singh', '98800-89012', '12, G.N. Chetty Road, T. Nagar, Chennai - 600017'),
+  ('Rajesh Gupta', '98900-90123', '4, Luz Church Road, Mylapore, Chennai - 600004'),
+  ('Siddharth Malhotra', '98000-01234', '5, 2nd Avenue, Anna Nagar, Chennai - 600040'),
+  ('Neha Sharma', '98111-12345', '71, L.B. Road, Adyar, Chennai - 600020'),
+  ('Vikram Rao', '98222-23456', '230, Taramani Link Road, Velachery, Chennai - 600042'),
+  ('Sneha Iyer', '98333-34567', '44, Royapettah High Road, Mylapore, Chennai - 600004'),
+  ('Kabir Bose', '98444-45678', '8, Pondy Bazaar, T. Nagar, Chennai - 600017'),
+  ('Rohan Deshmukh', '98555-56789', '18, West Colony, Anna Nagar, Chennai - 600040'),
+  ('Anjali Desai', '98666-67890', '9, Padmanabha Nagar, Adyar, Chennai - 600020'),
+  ('Karan Johar', '98777-78901', '55, North Usman Road, T. Nagar, Chennai - 600017'),
+  ('Divya Dutta', '98888-89012', '19, Vijaya Nagar, Velachery, Chennai - 600042'),
+  ('Varun Dhawan', '98999-90123', '28, Santhome High Road, Mylapore, Chennai - 600004'),
+  ('Alia Bhatt', '98000-11111', '67, H-Block, Anna Nagar, Chennai - 600040'),
+  ('Ranbir Kapoor', '98111-22222', '31, Shastri Nagar, Adyar, Chennai - 600020'),
+  ('Deepika Padukone', '98222-33333', '88, Dhandeeswaram Nagar, Velachery, Chennai - 600042'),
+  ('Ranveer Singh', '98333-44444', '90, Burkit Road, T. Nagar, Chennai - 600017'),
+  ('Katrina Kaif', '98444-55555', '3, Radhakrishnan Salai, Mylapore, Chennai - 600004'),
+  ('Vicky Kaushal', '98555-66666', '12, Y-Block, Anna Nagar, Chennai - 600040'),
+  ('Kiara Advani', '98666-77777', '14, Indira Nagar, Adyar, Chennai - 600020'),
+  ('Sidharth Malhotra', '98777-88888', '77, South Boag Road, T. Nagar, Chennai - 600017'),
+  ('Kriti Sanon', '98888-99999', '11, Lic Colony, Velachery, Chennai - 600042'),
+  ('Ayushmann Khurrana', '98999-00000', '15, Kapaleeswarar Temple Sannidhi, Mylapore, Chennai - 600004'),
+  ('Kartik Aaryan', '98000-22222', '41, Blue Stone Avenue, Anna Nagar, Chennai - 600040');
 
 -- Generate 400 sales dynamically over the last 6 months
 do $$

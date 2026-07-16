@@ -79,7 +79,7 @@ async function exportData() {
     if (custErr) throw custErr;
     fs.writeFileSync(
       path.join(outputDir, "customers.csv"),
-      convertToCSV(customers, ["id", "name", "phone", "region"])
+      convertToCSV(customers, ["id", "name", "phone", "address"])
     );
     console.log(`✅ Exported customers.csv (${customers.length} rows)`);
 

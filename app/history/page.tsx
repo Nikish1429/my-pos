@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 type CustomerRelation = {
+  id: number;
   name: string;
+  phone?: string;
+  address?: string;
 } | null;
 
 type UserRelation = {
@@ -191,7 +194,7 @@ export default function HistoryPage() {
                           {new Date(sale.sale_date).toLocaleString()}
                         </td>
                         <td className="px-4 py-4 text-xs text-zinc-900 font-semibold">
-                          {sale.customer ? sale.customer.name : "Guest"}
+                          {sale.customer ? `${sale.customer.name} (#${sale.customer.id})` : "Guest"}
                         </td>
                         <td className="px-4 py-4 text-xs text-zinc-600">
                           {sale.user ? sale.user.name : "Terminal #1"}
@@ -238,7 +241,10 @@ export default function HistoryPage() {
                 <div className="space-y-1 text-3xs border-b border-dashed border-zinc-300 pb-3">
                   <p><b>RECEIPT ID:</b> #{selectedSaleDetail.id}</p>
                   <p><b>DATE:</b> {new Date(selectedSaleDetail.sale_date).toLocaleString()}</p>
-                  <p><b>CUSTOMER:</b> {selectedSaleDetail.customer ? selectedSaleDetail.customer.name : "Walk-in Customer (Guest)"}</p>
+                  <p><b>CUSTOMER:</b> {selectedSaleDetail.customer ? `${selectedSaleDetail.customer.name} (#${selectedSaleDetail.customer.id})` : "Walk-in Customer (Guest)"}</p>
+                  {selectedSaleDetail.customer?.address && (
+                    <p className="whitespace-normal leading-tight"><b>ADDRESS:</b> {selectedSaleDetail.customer.address}</p>
+                  )}
                   <p><b>OPERATOR:</b> {selectedSaleDetail.user ? selectedSaleDetail.user.name : "System Cashier"}</p>
                 </div>
 

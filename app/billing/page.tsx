@@ -14,7 +14,8 @@ type Product = {
 type Customer = {
   id: number;
   name: string;
-  region: string;
+  phone?: string;
+  address: string;
 };
 
 type CartItem = {
@@ -45,7 +46,9 @@ export default function BillingPage() {
     saleId: number;
     totalAmount: number;
     date: string;
+    customerId: number | null;
     customerName: string | null;
+    customerAddress: string | null;
     items: { name: string; quantity: number; price: number }[];
   } | null>(null);
 
@@ -182,7 +185,9 @@ export default function BillingPage() {
         saleId: data.sale_id,
         totalAmount: data.total_amount,
         date: new Date().toLocaleString(),
+        customerId: customerObj ? customerObj.id : null,
         customerName: customerObj ? customerObj.name : "Walk-in Customer",
+        customerAddress: customerObj ? customerObj.address : null,
         items: cart.map((item) => ({
           name: item.product.name,
           quantity: item.quantity,
@@ -409,12 +414,12 @@ export default function BillingPage() {
             <select
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900"
+              className="mt-2 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold"
             >
               <option value="">Walk-in Customer (Guest)</option>
               {customers.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name} ({c.region})
+                  {c.name} (ID: #{c.id})
                 </option>
               ))}
             </select>
@@ -498,15 +503,18 @@ export default function BillingPage() {
             {/* Printable Receipt Area */}
             <div id="receipt-print-area" className="p-6 bg-white text-zinc-900 font-mono text-xs">
               <div className="text-center pb-4 border-b border-dashed border-zinc-300">
-                <h2 className="text-lg font-bold tracking-wider">MY-POS</h2>
-                <p className="text-2xs text-zinc-500 mt-1">123 Coffee Street, Seattle, WA</p>
-                <p className="text-2xs text-zinc-500">Tel: (555) 0199</p>
+                <h2 className="text-lg font-bold tracking-wider">MY-POS (CHENNAI)</h2>
+                <p className="text-2xs text-zinc-500 mt-1">100 Feet Bypass Road, Velachery, Chennai</p>
+                <p className="text-2xs text-zinc-500">Tel: +91 44 2244 5566</p>
               </div>
 
               <div className="py-4 border-b border-dashed border-zinc-300 space-y-1">
                 <p><b>RECEIPT ID:</b> #{completedSale.saleId}</p>
                 <p><b>DATE:</b> {completedSale.date}</p>
-                <p><b>CUSTOMER:</b> {completedSale.customerName}</p>
+                <p><b>CUSTOMER:</b> {completedSale.customerName} {completedSale.customerId ? `(#${completedSale.customerId})` : ""}</p>
+                {completedSale.customerAddress && (
+                  <p className="whitespace-normal leading-tight"><b>ADDRESS:</b> {completedSale.customerAddress}</p>
+                )}
                 <p><b>OPERATOR:</b> Cashier Terminal #1</p>
               </div>
 

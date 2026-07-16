@@ -35,8 +35,9 @@ import {
 } from "recharts";
 
 interface CustomerJoin {
+  id: number;
   name: string;
-  region: string;
+  address: string;
 }
 
 interface UserJoin {
@@ -73,6 +74,17 @@ interface RawData {
 }
 
 const COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+
+const getAreaFromAddress = (address: string | undefined): string => {
+  if (!address) return "Walk-in";
+  const areas = ["Adyar", "T. Nagar", "Velachery", "Mylapore", "Anna Nagar"];
+  for (const area of areas) {
+    if (address.toLowerCase().includes(area.toLowerCase())) {
+      return area;
+    }
+  }
+  return "Other";
+};
 
 export default function AnalyticsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -140,7 +152,7 @@ export default function AnalyticsPage() {
       }
 
       // Region/Place Filter (from Place Bar Chart click)
-      const region = sale.customers?.region || "Walk-in";
+      const region = getAreaFromAddress(sale.customers?.address);
       if (selectedRegion !== "All" && region !== selectedRegion) return false;
 
       // Month Filter (from Line Chart point click)
@@ -152,7 +164,9 @@ export default function AnalyticsPage() {
 
       // Customer Filter (from Leaderboard row click)
       if (selectedCustomer) {
-        const custName = sale.customers?.name || "Walk-in (Guest)";
+        const custName = sale.customers
+          ? `${sale.customers.name} (#${sale.customers.id})`
+          : "Walk-in (Guest)";
         if (custName !== selectedCustomer) return false;
       }
 
@@ -232,7 +246,7 @@ export default function AnalyticsPage() {
 
     if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
-        const region = s.customers?.region || "Walk-in";
+        const region = getAreaFromAddress(s.customers?.address);
         if (regionsList.includes(region)) {
           regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(s.total_amount);
         }
@@ -241,7 +255,7 @@ export default function AnalyticsPage() {
       filteredSaleItems.forEach((item) => {
         const sale = sales.find((s) => s.id === item.sale_id);
         if (sale) {
-          const region = sale.customers?.region || "Walk-in";
+          const region = getAreaFromAddress(sale.customers?.address);
           if (regionsList.includes(region)) {
             regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(item.quantity) * Number(item.unit_price);
           }
@@ -285,14 +299,18 @@ export default function AnalyticsPage() {
     const customerSpendingMap: { [key: string]: number } = {};
     if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
-        const custName = s.customers?.name || "Walk-in (Guest)";
+        const custName = s.customers
+          ? `${s.customers.name} (#${s.customers.id})`
+          : "Walk-in (Guest)";
         customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
       });
     } else {
       filteredSaleItems.forEach((item) => {
         const sale = sales.find((s) => s.id === item.sale_id);
         if (sale) {
-          const custName = sale.customers?.name || "Walk-in (Guest)";
+          const custName = sale.customers
+            ? `${sale.customers.name} (#${sale.customers.id})`
+            : "Walk-in (Guest)";
           customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(item.quantity) * Number(item.unit_price);
         }
       });
