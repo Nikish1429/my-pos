@@ -48,6 +48,60 @@ Sign in directly on the [Login Screen](https://my-pos-lyart.vercel.app/login) us
 
 ---
 
+## 📐 Project Architecture Diagram
+
+```mermaid
+graph TD
+    classDef client fill:#e0f2fe,stroke:#0284c7,stroke-width:2px;
+    classDef server fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px;
+    classDef db fill:#f0fdf4,stroke:#16a34a,stroke-width:2px;
+    classDef bi fill:#fffbeb,stroke:#d97706,stroke-width:2px;
+
+    subgraph Client ["Client Side (Next.js SPA)"]
+        UI["Web Interface (Tailwind CSS)"]:::client
+        Audio["Web Audio Controller (Scanner/Cart Sound)"]:::client
+        Rec["Product Recommendation Engine"]:::client
+        AuthContext["Auth Context (Session Management)"]:::client
+    end
+
+    subgraph Intelligence ["my-POS Intelligence Dashboard"]
+        Chatbot["NLP Chatbot Engine"]:::client
+        Forecast["Demand Forecasting (SMA Analysis)"]:::client
+        Anomaly["Anomaly & Suspicious Logs Auditor"]:::client
+        InventoryAlert["Smart Stock Alerts Engine"]:::client
+    end
+
+    subgraph Backend ["Backend & Storage (Supabase Cloud)"]
+        Auth["Supabase Auth Service"]:::server
+        DB[("PostgreSQL DB (Tables: users, products, sales, sale_items, customers)")]:::db
+    end
+
+    subgraph PowerBI ["Analytics & Reporting"]
+        CSVExport["CSV Data Exporter (Node.js)"]:::bi
+        PBIReport["Power BI Desktop (Visual Analytics)"]:::bi
+    end
+
+    %% Flows
+    UI --> AuthContext
+    AuthContext --> Auth
+    UI --> Audio
+    UI --> Rec
+    UI --> Chatbot
+    
+    %% DB Queries
+    AuthContext --> DB
+    Chatbot --> DB
+    Forecast --> DB
+    Anomaly --> DB
+    InventoryAlert --> DB
+    
+    %% Exports
+    DB --> CSVExport
+    CSVExport --> PBIReport
+```
+
+---
+
 ## ✨ Features & Architecture
 
 ### 1. 🛒 Dynamic Checkout & Sound Effects
