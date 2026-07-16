@@ -53,12 +53,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-zinc-950 via-slate-900 to-indigo-950 px-6 py-12 font-sans relative overflow-hidden">
       {/* Dynamic Background Blurs */}
-      <div className="absolute top-1/4 left-1/4 h-80 w-80 bg-indigo-500 rounded-full blur-[120px] opacity-25 -z-10 animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 h-96 w-96 bg-purple-500 rounded-full blur-[140px] opacity-20 -z-10" />
+      <div className="absolute top-1/4 left-1/4 h-80 w-80 bg-indigo-600 rounded-full blur-[140px] opacity-25 -z-10 animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 h-96 w-96 bg-purple-300 rounded-full blur-[150px] opacity-35 -z-10" />
+      <div className="absolute top-1/2 right-10 h-72 w-72 bg-sky-400 rounded-full blur-[130px] opacity-20 -z-10" />
 
       {/* Login Card */}
       <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl text-white relative">
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-20 w-20 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg border border-white/20">
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 h-20 w-20 rounded-2xl bg-gradient-to-tr from-indigo-400 via-purple-300 to-pink-400 flex items-center justify-center shadow-lg border border-white/20">
           <ShieldCheck className="h-10 w-10 text-white" />
         </div>
 
@@ -121,7 +122,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3 text-center text-xs font-black uppercase tracking-widest text-white shadow-lg hover:from-indigo-500 hover:to-purple-500 transition-all disabled:opacity-50 active:scale-[0.98] mt-2 border border-white/10 flex items-center justify-center gap-2"
+            className="w-full rounded-xl bg-gradient-to-r from-indigo-500 via-purple-400 to-pink-500 py-3 text-center text-xs font-black uppercase tracking-widest text-white shadow-lg hover:from-indigo-400 hover:via-purple-300 hover:to-pink-400 transition-all disabled:opacity-50 active:scale-[0.98] mt-2 border border-white/10 flex items-center justify-center gap-2"
           >
             {loading ? (
               <>

@@ -17,6 +17,7 @@ import {
 
 interface CustomerJoin {
   name: string;
+  address?: string;
 }
 
 interface Sale {
@@ -153,8 +154,39 @@ export default function AIManagerPage() {
 
     const { sales, saleItems } = rawData;
     const normalized = userMsg.toLowerCase();
-    let reply = "I'm sorry, I couldn't compute that answer. Try asking for: 'most sold product this month', 'revenue in June', or 'top customer'.";
+    let reply = "I'm sorry, I couldn't compute that database answer. Try asking about a specific product name (e.g. 'Filter Coffee'), a customer (e.g. 'Aarav'), a neighborhood (e.g. 'Velachery'), a month (e.g. 'June'), or general calculations (e.g. '1500 * 0.10').";
 
+    // --- Entity Extraction ---
+    let matchedProduct: string | null = null;
+    let matchedCustomer: string | null = null;
+    let matchedNeighborhood: string | null = null;
+
+    // Extract product
+    const distinctProductNames = Array.from(new Set(saleItems.map(item => item.products?.name).filter(Boolean))) as string[];
+    for (const name of distinctProductNames) {
+      if (normalized.includes(name.toLowerCase())) {
+        matchedProduct = name;
+      }
+    }
+
+    // Extract neighborhood
+    const neighborhoods = ["adyar", "t. nagar", "velachery", "mylapore", "anna nagar"];
+    for (const n of neighborhoods) {
+      if (normalized.includes(n)) {
+        matchedNeighborhood = n;
+      }
+    }
+
+    // Extract customer
+    const distinctCustomerNames = Array.from(new Set(sales.map(s => s.customers?.name).filter(Boolean))) as string[];
+    for (const name of distinctCustomerNames) {
+      if (normalized.includes(name.toLowerCase())) {
+        matchedCustomer = name;
+      }
+    }
+
+    // --- Decision Tree (Semantic Router) ---
+    
     // 1. Math Calculation Engine
     const isMathExpression = /[\d]+/.test(normalized) && (
       normalized.includes("+") || 
@@ -186,8 +218,28 @@ export default function AIManagerPage() {
         reply = "I attempted to compute that mathematical query but encountered a format error. Please try a simple expression like '1500 * 0.10' or '250 + 60'.";
       }
     } 
-    // 2. Total sales / revenue query
-    else if (normalized.includes("revenue") || normalized.includes("sales") || normalized.includes("earnings")) {
+    // 2. Specific Product Query
+    else if (matchedProduct) {
+      const itemsForProduct = saleItems.filter(item => item.products?.name === matchedProduct);
+      const unitsSold = itemsForProduct.reduce((sum, item) => sum + item.quantity, 0);
+      const totalRevenue = itemsForProduct.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+      reply = `☕ **Product Summary for ${matchedProduct}**:\n• Total Units Sold: **${unitsSold}**\n• Generated Revenue: **₹${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}**\n• Average Selling Price: **₹${(totalRevenue / (unitsSold || 1)).toFixed(2)}**`;
+    }
+    // 3. Specific Customer Query
+    else if (matchedCustomer) {
+      const customerSales = sales.filter(s => s.customers?.name.toLowerCase() === matchedCustomer?.toLowerCase());
+      const totalSpend = customerSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      reply = `👤 **Customer Profile: ${matchedCustomer}**:\n• Total Spending: **₹${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2 })}**\n• Total Transactions: **${customerSales.length}**\n• Average Ticket: **₹${(totalSpend / (customerSales.length || 1)).toFixed(2)}**`;
+    }
+    // 4. Neighborhood Area Query
+    else if (matchedNeighborhood) {
+      const neighborhoodSales = sales.filter(s => s.customers?.address && s.customers.address.toLowerCase().includes(matchedNeighborhood || ""));
+      const totalSales = neighborhoodSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      reply = `📍 **Neighborhood Summary: ${matchedNeighborhood.toUpperCase()}**:\n• Total Sales Revenue: **₹${totalSales.toLocaleString(undefined, { minimumFractionDigits: 2 })}**\n• Active Orders: **${neighborhoodSales.length}**\n• Average Order Size: **₹${(totalSales / (neighborhoodSales.length || 1)).toFixed(2)}**`;
+    }
+    // 5. Month Specific Query
+    else if (normalized.includes("january") || normalized.includes("february") || normalized.includes("march") || normalized.includes("april") || normalized.includes("may") || normalized.includes("june") || normalized.includes("july") || normalized.includes("august") || normalized.includes("september") || normalized.includes("october") || normalized.includes("november") || normalized.includes("december") ||
+             normalized.includes("jan") || normalized.includes("feb") || normalized.includes("mar") || normalized.includes("apr") || normalized.includes("jun") || normalized.includes("jul") || normalized.includes("aug") || normalized.includes("sep") || normalized.includes("oct") || normalized.includes("nov") || normalized.includes("dec")) {
       const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
       const shortMonths = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
       
@@ -205,13 +257,10 @@ export default function AIManagerPage() {
           .reduce((sum, s) => sum + Number(s.total_amount), 0);
 
         reply = `📊 Total revenue for **${targetMonthName.toUpperCase()}** is **₹${monthlyTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}** over ${sales.filter((s) => new Date(s.sale_date).getMonth() === matchedMonthIndex).length} orders.`;
-      } else {
-        const total = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
-        reply = `📈 Our overall total revenue recorded across all databases is **₹${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}**.`;
       }
-    } 
-    // 3. Most sold product query
-    else if (normalized.includes("product") && (normalized.includes("most") || normalized.includes("best") || normalized.includes("sold") || normalized.includes("popular"))) {
+    }
+    // 6. Generic "most sold" / best selling query
+    else if (normalized.includes("most") || normalized.includes("best") || normalized.includes("popular") || normalized.includes("top")) {
       const productQtyMap: { [key: string]: number } = {};
       saleItems.forEach((item) => {
         const prodName = item.products?.name || "Unknown Product";
@@ -219,47 +268,36 @@ export default function AIManagerPage() {
       });
       const sorted = Object.keys(productQtyMap).sort((a, b) => productQtyMap[b] - productQtyMap[a]);
       if (sorted.length > 0) {
-        reply = `☕ The best-selling product overall is **${sorted[0]}** with a total of **${productQtyMap[sorted[0]]} units** sold.`;
+        reply = `🏆 The best-selling product overall is **${sorted[0]}** with a total of **${productQtyMap[sorted[0]]} units** sold.`;
       }
-    } 
-    // 4. Customer spending query
-    else if (normalized.includes("customer") || normalized.includes("member")) {
-      if (normalized.includes("how many") || normalized.includes("number of")) {
-        const distinctCustomers = new Set(sales.filter(s => s.customer_id).map(s => s.customer_id)).size;
-        reply = `👤 There are **${distinctCustomers} registered customers** who have placed orders in our system.`;
-      } else {
-        const customerSpendingMap: { [key: string]: number } = {};
-        sales.forEach((s) => {
-          const custName = s.customers?.name || "Walk-in Guest";
-          if (custName !== "Walk-in Guest") {
-            customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
-          }
-        });
-        const sortedCust = Object.keys(customerSpendingMap).sort((a, b) => customerSpendingMap[b] - customerSpendingMap[a]);
-        if (sortedCust.length > 0) {
-          reply = `👤 Our highest spending loyalty member is **${sortedCust[0]}**, having spent a total of **₹${customerSpendingMap[sortedCust[0]].toLocaleString(undefined, { minimumFractionDigits: 2 })}** at our terminal.`;
-        } else {
-          reply = "No registered loyalty members found in our current sales logs.";
-        }
-      }
-    } 
-    // 5. Category query
-    else if (normalized.includes("category")) {
-      const catRevenueMap: { [key: string]: number } = {};
+    }
+    // 7. Generic "least sold" / worst query
+    else if (normalized.includes("least") || normalized.includes("worst") || normalized.includes("slow")) {
+      const productQtyMap: { [key: string]: number } = {};
       saleItems.forEach((item) => {
-        const catName = item.products?.category || "Other";
-        catRevenueMap[catName] = (catRevenueMap[catName] || 0) + (item.quantity * item.unit_price);
+        const prodName = item.products?.name || "Unknown Product";
+        productQtyMap[prodName] = (productQtyMap[prodName] || 0) + item.quantity;
       });
-      const sortedCat = Object.keys(catRevenueMap).sort((a, b) => catRevenueMap[b] - catRevenueMap[a]);
-      if (sortedCat.length > 0) {
-        reply = `🛍️ The highest revenue generating product category is **${sortedCat[0]}**, contributing **₹${catRevenueMap[sortedCat[0]].toLocaleString(undefined, { minimumFractionDigits: 2 })}** to our store.`;
+      const sorted = Object.keys(productQtyMap).sort((a, b) => productQtyMap[a] - productQtyMap[b]);
+      if (sorted.length > 0) {
+        reply = `⚠️ The lowest selling product is **${sorted[0]}** with only **${productQtyMap[sorted[0]]} units** sold.`;
       }
-    } 
-    // 6. Transaction count queries
-    else if (normalized.includes("how many sales") || normalized.includes("number of sales") || normalized.includes("total orders") || normalized.includes("transaction")) {
+    }
+    // 8. General Revenue / Earnings summaries
+    else if (normalized.includes("revenue") || normalized.includes("sales") || normalized.includes("earnings") || normalized.includes("turnover")) {
+      const total = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      reply = `📈 Our overall store revenue is **₹${total.toLocaleString(undefined, { minimumFractionDigits: 2 })}**.`;
+    }
+    // 9. Customer Counts
+    else if (normalized.includes("how many customers") || normalized.includes("number of customers")) {
+      const distinctCustomers = new Set(sales.filter(s => s.customer_id).map(s => s.customer_id)).size;
+      reply = `👤 There are **${distinctCustomers} registered customers** who have placed orders in our system.`;
+    }
+    // 10. Transaction / Orders Counts
+    else if (normalized.includes("how many sales") || normalized.includes("number of sales") || normalized.includes("total orders") || normalized.includes("transactions")) {
       reply = `📊 There are currently **${sales.length} transactions** recorded in the database.`;
-    } 
-    // 7. Average transaction value queries
+    }
+    // 11. Average Sale Values
     else if (normalized.includes("average order") || normalized.includes("average sale") || normalized.includes("average ticket")) {
       const totalRev = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
       const avg = totalRev / (sales.length || 1);
