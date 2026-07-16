@@ -72,7 +72,7 @@ export default function LoginPage() {
       </header>
 
       {/* Center Registration/Login Card */}
-      <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-8 md:p-10 shadow-2xl text-white relative z-10 mt-12">
+      <div className="w-full max-w-[480px] rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-8 md:p-10 shadow-2xl text-white relative z-10 mt-12">
         <div className="text-center mb-7">
           <h1 className="text-2xl font-black tracking-wide text-white">Sign in to my-POS</h1>
           <p className="mt-1.5 text-3xs font-semibold text-white/60">
@@ -147,19 +147,19 @@ export default function LoginPage() {
           <p className="font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wide">
             🔑 Operator Sign-In Details:
           </p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
-              <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Admin Email</p>
-              <code className="text-white block mt-0.5 font-mono text-3xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaranr@gmail.com</code>
+          <div className="mt-3 space-y-2">
+            <div className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-1.5 border border-white/5">
+              <span className="font-black text-indigo-300 uppercase tracking-wider text-[10px]">Admin:</span>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono text-[11px] select-all">nikishkumaranr@gmail.com</code>
             </div>
-            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
-              <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Cashier Email</p>
-              <code className="text-white block mt-0.5 font-mono text-3xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaran5@gmail.com</code>
+            <div className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-1.5 border border-white/5">
+              <span className="font-black text-indigo-300 uppercase tracking-wider text-[10px]">Cashier:</span>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono text-[11px] select-all">nikishkumaran5@gmail.com</code>
             </div>
-          </div>
-          <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 flex justify-between items-center mt-3">
-            <span className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Password</span>
-            <code className="text-white font-mono text-2xs select-all bg-white/10 px-2 py-0.5 rounded">Pos@123</code>
+            <div className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-1.5 border border-white/5">
+              <span className="font-black text-indigo-300 uppercase tracking-wider text-[10px]">Password:</span>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono text-[11px] select-all">Pos@123</code>
+            </div>
           </div>
         </div>
       </div>
