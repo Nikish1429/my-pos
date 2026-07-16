@@ -350,49 +350,94 @@ export default function AIManagerPage() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
-            <span className="text-lg font-black tracking-tight text-zinc-950">my-POS Intelligence Dashboard</span>
+            <span className="text-lg font-black tracking-tight text-zinc-950">my-POS Cockpit & Chatbot</span>
           </div>
-          <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-3.5 py-1.5 text-4xs font-black uppercase text-white tracking-widest shadow-sm">
-            <Sparkles className="h-3 w-3 text-amber-300 fill-amber-300 animate-pulse" /> my-POS Intelligence Active
+          <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-500 to-indigo-600 px-3.5 py-1.5 text-4xs font-black uppercase text-white tracking-widest shadow-sm">
+            <Sparkles className="h-3 w-3 text-amber-300 fill-amber-300 animate-pulse" /> my-POS AI Active
           </span>
         </div>
       </nav>
 
-      {/* Main layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Main layout in a balanced grid */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
         
-        {/* Left 2 Columns: AI Forecast, Anomalies, Stock Alerts */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Row 1: Chatbot, Demand Forecasting, Anomaly Logs (Equal Height: 440px) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Card 1: Demand Forecasting & stockout alerts */}
-          <div className="bg-white border border-zinc-200 border-t-4 border-t-emerald-500 rounded-2xl p-6 shadow-sm">
+          {/* Card 1: Chatbot (Sunrise/Sunset Gradient Theme Matching Login) */}
+          <div className="bg-gradient-to-br from-sky-400 via-pink-500 via-purple-600 to-indigo-950 border border-white/20 rounded-3xl p-5 shadow-xl flex flex-col h-[440px] text-white">
+            <div className="border-b border-white/20 pb-3 flex items-center justify-between">
+              <h2 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-white animate-pulse" /> Chatbot
+              </h2>
+              <span className="text-[9px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider text-white">
+                Live NLP
+              </span>
+            </div>
+
+            {/* Chat log messages area */}
+            <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-1 text-2xs leading-relaxed scrollbar-none">
+              {chatLog.map((log, idx) => (
+                <div
+                  key={idx}
+                  className={`flex flex-col rounded-2xl p-3 shadow-md max-w-[85%] ${
+                    log.role === "user"
+                      ? "bg-white text-zinc-950 self-end ml-auto"
+                      : "bg-black/35 border border-white/10 text-zinc-100 self-start mr-auto"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap font-semibold">{log.text}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Chat Form */}
+            <form onSubmit={handleChatSubmit} className="mt-4 pt-3 border-t border-white/20 flex gap-2">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Ask chatbot, e.g. 'Show June sales'"
+                className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-2xs outline-none focus:border-white focus:bg-white/20 transition-all text-white font-semibold placeholder-white/70"
+              />
+              <button
+                type="submit"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-purple-950 shadow-md hover:bg-zinc-100 transition-all active:scale-95"
+              >
+                <Send className="h-3.5 w-3.5 text-indigo-900 fill-indigo-900" />
+              </button>
+            </form>
+          </div>
+
+          {/* Card 2: Demand Forecasting (Scrollable Table, Equal Height) */}
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-emerald-500 rounded-3xl p-5 shadow-sm flex flex-col h-[440px]">
             <h2 className="text-xs font-black uppercase tracking-wider text-emerald-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-emerald-600" /> Product Demand Forecasting & Safety Stock
+              <TrendingUp className="h-4 w-4 text-emerald-600" /> Product Demand Forecasting
             </h2>
-            <div className="mt-4 overflow-x-auto">
+            <div className="flex-1 overflow-y-auto mt-2 pr-1">
               <table className="min-w-full text-left text-2xs divide-y divide-zinc-200 font-medium">
                 <thead>
                   <tr className="text-zinc-400 font-bold uppercase tracking-wider">
-                    <th className="py-2.5 px-3">Product Name</th>
-                    <th className="py-2.5 px-3 text-right">Avg Daily Qty</th>
-                    <th className="py-2.5 px-3 text-right">Next Week Forecast</th>
-                    <th className="py-2.5 px-3 text-right">Stock Status</th>
+                    <th className="py-2.5 px-3">Product</th>
+                    <th className="py-2.5 px-3 text-right">Avg Daily</th>
+                    <th className="py-2.5 px-3 text-right font-bold">Forecast</th>
+                    <th className="py-2.5 px-3 text-right">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 text-zinc-800">
-                  {aiInsights.forecasting.slice(0, 5).map((f, idx) => (
+                  {aiInsights.forecasting.slice(0, 10).map((f, idx) => (
                     <tr key={idx} className="hover:bg-zinc-50/50">
-                      <td className="py-3 px-3 font-semibold text-zinc-950">{f.name}</td>
+                      <td className="py-3 px-3 font-bold text-zinc-950">{f.name}</td>
                       <td className="py-3 px-3 text-right text-zinc-500">{f.avgDailyQty} units</td>
                       <td className="py-3 px-3 text-right font-extrabold text-zinc-900">{f.nextWeekForecast} units</td>
                       <td className="py-3 px-3 text-right">
                         {f.isLowStockWarning ? (
                           <span className="inline-flex items-center gap-1 rounded bg-amber-50 border border-amber-200 px-2 py-0.5 text-4xs font-black text-amber-700 uppercase">
-                            <AlertTriangle className="h-2.5 w-2.5" /> High Stockout Risk
+                            Low Stock
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 rounded bg-zinc-100 px-2 py-0.5 text-4xs font-bold text-zinc-600 uppercase">
-                            Stable Stock
+                            Stable
                           </span>
                         )}
                       </td>
@@ -403,12 +448,12 @@ export default function AIManagerPage() {
             </div>
           </div>
 
-          {/* Card 2: Anomaly Detection List */}
-          <div className="bg-white border border-zinc-200 border-t-4 border-t-red-500 rounded-2xl p-6 shadow-sm">
+          {/* Card 3: Anomaly Detection List (Scrollable Logs, Equal Height) */}
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-red-500 rounded-3xl p-5 shadow-sm flex flex-col h-[440px]">
             <h2 className="text-xs font-black uppercase tracking-wider text-red-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-600" /> Real-time Anomaly & Suspicious Activity Logs
+              <AlertTriangle className="h-4 w-4 text-red-600" /> Real-time Anomaly Logs
             </h2>
-            <div className="mt-4 space-y-3">
+            <div className="flex-1 overflow-y-auto mt-3 space-y-3 pr-1">
               {aiInsights.anomalies.map((a, idx) => (
                 <div key={idx} className="flex justify-between items-start border border-red-100 rounded-xl p-3.5 bg-red-50/10 hover:bg-red-50/20 transition-all">
                   <div className="space-y-1">
@@ -426,79 +471,66 @@ export default function AIManagerPage() {
             </div>
           </div>
 
-          {/* Card 3: Smart Inventory Alerts (Reorder Suggestion) */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Fast Moving */}
-            <div className="bg-white border border-zinc-200 border-t-4 border-t-cyan-500 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-2xs font-black uppercase tracking-wider text-cyan-800 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
-                <Zap className="h-3.5 w-3.5 text-cyan-600" /> Fast-Moving Products
-              </h3>
-              <ul className="space-y-2">
-                {aiInsights.fastMoving.map((p, idx) => (
-                  <li key={idx} className="flex justify-between items-center text-xs font-semibold text-zinc-800">
-                    <span>{p.name}</span>
-                    <span className="text-2xs text-cyan-700 font-extrabold bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-100">{p.nextWeekForecast} sold / wk</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* Slow Moving */}
-            <div className="bg-white border border-zinc-200 border-t-4 border-t-amber-500 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-2xs font-black uppercase tracking-wider text-amber-800 border-b border-zinc-100 pb-2 mb-3.5 flex items-center gap-1.5">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-600" /> Slow-Moving Products
-              </h3>
-              <ul className="space-y-2">
-                {aiInsights.slowMoving.map((p, idx) => (
-                  <li key={idx} className="flex justify-between items-center text-xs font-semibold text-zinc-800">
-                    <span>{p.name}</span>
-                    <span className="text-3xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded uppercase">Reorder Suggested</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
         </div>
 
-        {/* Right 1 Column: AI Chat Assistant */}
-        <div className="bg-gradient-to-br from-indigo-950 via-zinc-900 to-zinc-950 border border-indigo-500/20 rounded-3xl p-6 shadow-xl flex flex-col h-[calc(100vh-140px)] text-white">
-          <h2 className="text-xs font-black uppercase tracking-widest text-amber-300 border-b border-white/10 pb-3 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-indigo-300" /> POS Intelligence Assistant
-          </h2>
-
-          {/* Chat log messages area */}
-          <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-1 text-2xs leading-relaxed">
-            {chatLog.map((log, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col rounded-2xl p-3.5 shadow-md max-w-[85%] ${
-                  log.role === "user"
-                    ? "bg-white text-zinc-950 self-end ml-auto"
-                    : "bg-indigo-900/50 border border-indigo-500/30 text-zinc-100 self-start mr-auto"
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{log.text}</p>
-              </div>
-            ))}
+        {/* Row 2: Fast-Moving, Slow-Moving, Smart Inventory Alerts (Equal Height: 280px) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Card 4: Fast-Moving Products */}
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-cyan-500 rounded-3xl p-5 shadow-sm flex flex-col h-[280px]">
+            <h3 className="text-2xs font-black uppercase tracking-wider text-cyan-800 border-b border-zinc-100 pb-2 mb-3 flex items-center gap-1.5">
+              <Zap className="h-3.5 w-3.5 text-cyan-600" /> Fast-Moving Products
+            </h3>
+            <ul className="flex-1 overflow-y-auto space-y-2.5 pr-1 mt-1">
+              {aiInsights.fastMoving.map((p, idx) => (
+                <li key={idx} className="flex justify-between items-center text-xs font-semibold text-zinc-800">
+                  <span>{p.name}</span>
+                  <span className="text-2xs text-cyan-700 font-extrabold bg-cyan-50 px-2.5 py-1 rounded-full border border-cyan-100">
+                    {p.nextWeekForecast} sold / wk
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Card 5: Slow-Moving Products */}
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-amber-500 rounded-3xl p-5 shadow-sm flex flex-col h-[280px]">
+            <h3 className="text-2xs font-black uppercase tracking-wider text-amber-800 border-b border-zinc-100 pb-2 mb-3 flex items-center gap-1.5">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600" /> Slow-Moving Products
+            </h3>
+            <ul className="flex-1 overflow-y-auto space-y-2.5 pr-1 mt-1">
+              {aiInsights.slowMoving.map((p, idx) => (
+                <li key={idx} className="flex justify-between items-center text-xs font-semibold text-zinc-800">
+                  <span>{p.name}</span>
+                  <span className="text-4xs font-black text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded uppercase tracking-wider">
+                    Reorder Suggested
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Chat Form */}
-          <form onSubmit={handleChatSubmit} className="mt-4 pt-3 border-t border-white/10 flex gap-2">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask math or metrics, e.g. '1500 * 0.10'"
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-2xs outline-none focus:border-indigo-400 focus:bg-white/10 transition-all text-white font-semibold"
-            />
-            <button
-              type="submit"
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 transition-all active:scale-95"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </button>
-          </form>
+          {/* Card 6: Smart Restock & Promotion Advice (New Card for perfect balance) */}
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-purple-500 rounded-3xl p-5 shadow-sm flex flex-col h-[280px]">
+            <h3 className="text-2xs font-black uppercase tracking-wider text-purple-800 border-b border-zinc-100 pb-2 mb-3 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-purple-600" /> Smart Inventory Suggestions
+            </h3>
+            <div className="flex-1 overflow-y-auto space-y-2.5 text-2xs pr-1 mt-1">
+              <div className="bg-purple-50/30 border border-purple-100 rounded-xl p-2.5 text-purple-900 leading-relaxed font-semibold">
+                ☕ **Coffee & Beverage Spike**:
+                <p className="font-normal text-zinc-600 mt-0.5">Average daily sales suggest restocking coffee beans by Friday evening before the weekly surge.</p>
+              </div>
+              <div className="bg-purple-50/30 border border-purple-100 rounded-xl p-2.5 text-purple-900 leading-relaxed font-semibold">
+                🍡 **Gulab Jamun Combo Tip**:
+                <p className="font-normal text-zinc-600 mt-0.5">Gulab Jamun is fast-moving. Bundle it with savory snacks to increase your checkout ticket size by 15%.</p>
+              </div>
+              <div className="bg-purple-50/30 border border-purple-100 rounded-xl p-2.5 text-purple-900 leading-relaxed font-semibold">
+                🛍️ **Pani Puri Promo**:
+                <p className="font-normal text-zinc-600 mt-0.5">Slow sales detected. Introduce a weekend loyalty discount of 5% to boost transaction volumes.</p>
+              </div>
+            </div>
+          </div>
+          
         </div>
 
       </main>

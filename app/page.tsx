@@ -150,10 +150,10 @@ export default function Home() {
           <div className="absolute top-0 right-0 h-40 w-40 bg-pink-500/15 rounded-full blur-3xl -z-10" />
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h2 className="text-sm font-black tracking-widest uppercase flex items-center gap-2.5 text-amber-300">
-              <Brain className="h-6 w-6 text-indigo-300 group-hover:animate-bounce" /> my-POS Intelligence Engine
+              <Brain className="h-6 w-6 text-indigo-300 group-hover:animate-bounce" /> my-POS Chatbot & Cockpit
             </h2>
             <span className="flex items-center gap-1 text-2xs font-extrabold uppercase text-amber-400 group-hover:text-amber-300 transition-colors">
-              <Sparkles className="h-3.5 w-3.5 fill-amber-400" /> Start Engine →
+              <Sparkles className="h-3.5 w-3.5 fill-amber-400" /> Open Cockpit →
             </span>
           </div>
           <div className="mt-6 flex flex-col md:flex-row justify-between items-stretch md:items-center gap-6">
