@@ -66,18 +66,9 @@ export default function LoginPage() {
         </svg>
       </div>
 
-      {/* Top Navbar */}
-      <header className="absolute top-0 left-0 w-full px-10 py-6 flex items-center justify-between z-10 text-white/95">
+      {/* Top Brand Name */}
+      <header className="absolute top-0 left-0 w-full px-10 py-6 z-10 text-white/95">
         <span className="text-lg font-black tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-pink-200">my-POS</span>
-        <nav className="hidden md:flex items-center gap-8 text-2xs font-extrabold uppercase tracking-widest text-white/80">
-          <span className="hover:text-white cursor-pointer transition-colors">Home</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Service</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Contact</span>
-          <span className="hover:text-white cursor-pointer transition-colors">About</span>
-        </nav>
-        <button className="border border-white/40 rounded-full px-5 py-1.5 text-2xs font-bold uppercase tracking-wider hover:bg-white hover:text-purple-950 transition-all">
-          Login
-        </button>
       </header>
 
       {/* Center Registration/Login Card */}

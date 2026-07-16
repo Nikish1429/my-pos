@@ -145,9 +145,9 @@ export default function Home() {
 
         <Link
           href="/ai-manager"
-          className="block bg-gradient-to-br from-zinc-950 via-indigo-950 to-purple-950 border border-indigo-500/30 rounded-3xl p-9 shadow-xl hover:border-indigo-400 hover:shadow-2xl transition-all group active:scale-[0.99] relative overflow-hidden"
+          className="block bg-gradient-to-br from-indigo-950 via-purple-900 via-pink-900 to-indigo-950 border border-pink-500/20 rounded-3xl p-9 shadow-xl hover:border-pink-400 hover:shadow-2xl transition-all group active:scale-[0.99] relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 h-40 w-40 bg-indigo-500/10 rounded-full blur-3xl -z-10" />
+          <div className="absolute top-0 right-0 h-40 w-40 bg-pink-500/15 rounded-full blur-3xl -z-10" />
           <div className="flex items-center justify-between border-b border-white/10 pb-4">
             <h2 className="text-sm font-black tracking-widest uppercase flex items-center gap-2.5 text-amber-300">
               <Brain className="h-6 w-6 text-indigo-300 group-hover:animate-bounce" /> my-POS Intelligence Engine
