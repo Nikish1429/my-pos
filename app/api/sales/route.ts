@@ -1,6 +1,60 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 
+export async function GET(request: Request) {
+  const supabase = getSupabase();
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase client not configured" }, { status: 500 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const saleId = searchParams.get("id");
+
+  if (saleId) {
+    // Fetch details for a specific sale
+    const { data, error } = await supabase
+      .from("sales")
+      .select(`
+        id,
+        total_amount,
+        sale_date,
+        customer:customers(name),
+        user:users(name),
+        sale_items(
+          id,
+          quantity,
+          unit_price,
+          product:products(name)
+        )
+      `)
+      .eq("id", saleId)
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+    return NextResponse.json(data);
+  }
+
+  // Fetch all sales (summarized list)
+  const { data, error } = await supabase
+    .from("sales")
+    .select(`
+      id,
+      total_amount,
+      sale_date,
+      customer:customers(name),
+      user:users(name)
+    `)
+    .order("sale_date", { ascending: false });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
+
 export async function POST(request: Request) {
   const supabase = getSupabase();
   if (!supabase) {
