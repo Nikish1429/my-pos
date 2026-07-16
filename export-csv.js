@@ -79,7 +79,7 @@ async function exportData() {
     if (custErr) throw custErr;
     fs.writeFileSync(
       path.join(outputDir, "customers.csv"),
-      convertToCSV(customers, ["id", "name", "phone", "address"])
+      convertToCSV(customers, ["id", "name", "phone", "address", "is_value_member", "purchases_count"])
     );
     console.log(`✅ Exported customers.csv (${customers.length} rows)`);
 
@@ -88,7 +88,7 @@ async function exportData() {
     if (salesErr) throw salesErr;
     fs.writeFileSync(
       path.join(outputDir, "sales.csv"),
-      convertToCSV(sales, ["id", "customer_id", "user_id", "total_amount", "sale_date"])
+      convertToCSV(sales, ["id", "customer_id", "user_id", "total_amount", "discount_amount", "sale_date"])
     );
     console.log(`✅ Exported sales.csv (${sales.length} rows)`);
 

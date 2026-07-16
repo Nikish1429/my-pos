@@ -16,6 +16,8 @@ type Customer = {
   name: string;
   phone?: string;
   address: string;
+  is_value_member: boolean;
+  purchases_count: number;
 };
 
 type CartItem = {
@@ -35,6 +37,15 @@ export default function BillingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Add Customer form state (separate tab)
+  const [customerTab, setCustomerTab] = useState<"select" | "register">("select");
+  const [newName, setNewName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newAddress, setNewAddress] = useState("");
+  const [newIsValueMember, setNewIsValueMember] = useState(false);
+  const [newCustomerLoading, setNewCustomerLoading] = useState(false);
+  const [newCustomerError, setNewCustomerError] = useState<string | null>(null);
+
   // Recommendations state
   const [lastAddedProductId, setLastAddedProductId] = useState<number | null>(null);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
@@ -45,6 +56,7 @@ export default function BillingPage() {
   const [completedSale, setCompletedSale] = useState<{
     saleId: number;
     totalAmount: number;
+    discountAmount: number;
     date: string;
     customerId: number | null;
     customerName: string | null;
@@ -149,8 +161,61 @@ export default function BillingPage() {
     setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
   };
 
-  // Calculations
+  // Add Customer form submission
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newName || !newAddress) {
+      setNewCustomerError("Name and Address are required.");
+      return;
+    }
+
+    try {
+      setNewCustomerLoading(true);
+      setNewCustomerError(null);
+
+      const res = await fetch("/api/customers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newName,
+          phone: newPhone || null,
+          address: newAddress,
+          is_value_member: newIsValueMember,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to register customer.");
+      }
+
+      // Add to customers state list
+      setCustomers((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+      // Select the new customer
+      setSelectedCustomerId(String(data.id));
+
+      // Reset form
+      setNewName("");
+      setNewPhone("");
+      setNewAddress("");
+      setNewIsValueMember(false);
+      // Switch tab back to selection
+      setCustomerTab("select");
+    } catch (err: any) {
+      setNewCustomerError(err.message || "An error occurred.");
+    } finally {
+      setNewCustomerLoading(false);
+    }
+  };
+
+  // Calculations (Loyalty reward logic computed on client-side for UX review)
   const cartSubtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+
+  const customerObj = customers.find((c) => c.id === Number(selectedCustomerId));
+  const isValueMember = customerObj?.is_value_member || false;
+  const isEligibleForDiscount = isValueMember && customerObj?.purchases_count === 3;
+  const loyaltyDiscount = isEligibleForDiscount ? Number((cartSubtotal * 0.10).toFixed(2)) : 0;
+  const checkoutTotal = cartSubtotal - loyaltyDiscount;
 
   // Complete Sale Handler
   const handleCompleteSale = async () => {
@@ -178,16 +243,17 @@ export default function BillingPage() {
         throw new Error(data.error || "Failed to process sale");
       }
 
-      const customerObj = customers.find((c) => c.id === Number(selectedCustomerId));
+      const freshCustomerObj = customers.find((c) => c.id === Number(selectedCustomerId));
 
       // Set up receipt data
       setCompletedSale({
         saleId: data.sale_id,
         totalAmount: data.total_amount,
+        discountAmount: data.discount_amount || 0,
         date: new Date().toLocaleString(),
-        customerId: customerObj ? customerObj.id : null,
-        customerName: customerObj ? customerObj.name : "Walk-in Customer",
-        customerAddress: customerObj ? customerObj.address : null,
+        customerId: freshCustomerObj ? freshCustomerObj.id : null,
+        customerName: freshCustomerObj ? freshCustomerObj.name : "Walk-in Customer",
+        customerAddress: freshCustomerObj ? freshCustomerObj.address : null,
         items: cart.map((item) => ({
           name: item.product.name,
           quantity: item.quantity,
@@ -198,7 +264,7 @@ export default function BillingPage() {
       setIsReceiptOpen(true);
       setCart([]); // Clear cart
       setSelectedCustomerId(""); // Reset customer selector
-      fetchData(); // Refresh product stock numbers
+      fetchData(); // Refresh product stock & customer purchase counters
     } catch (err: any) {
       setCheckoutError(err.message || "An error occurred during checkout.");
     } finally {
@@ -260,6 +326,9 @@ export default function BillingPage() {
             <span className="text-sm font-medium text-zinc-600">Checkout Terminal</span>
           </div>
           <div className="flex gap-4">
+            <Link href="/history" className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all">
+              Transaction History
+            </Link>
             <Link href="/inventory" className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-all">
               Inventory Manager
             </Link>
@@ -269,7 +338,7 @@ export default function BillingPage() {
 
       {/* Main Container */}
       <div className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-        {/* Left Side: Product Selector (2 columns wide on desktop) */}
+        {/* Left Side: Product Catalog */}
         <div className="lg:col-span-2 flex flex-col bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm overflow-hidden h-[calc(100vh-140px)]">
           {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-zinc-100 pb-4">
@@ -402,28 +471,161 @@ export default function BillingPage() {
           )}
         </div>
 
-        {/* Right Side: Shopping Cart Summary */}
+        {/* Right Side: Shopping Cart Summary & Loyalty Program */}
         <div className="flex flex-col bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm h-[calc(100vh-140px)] overflow-hidden">
           <h2 className="text-lg font-bold text-zinc-900 border-b border-zinc-100 pb-3">Active Order</h2>
 
-          {/* Customer Selector */}
-          <div className="mt-4">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Customer Assignment
-            </label>
-            <select
-              value={selectedCustomerId}
-              onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold"
+          {/* Customer Selection/Register Tabs */}
+          <div className="mt-4 bg-zinc-50 border border-zinc-200 rounded-xl p-1.5 flex gap-1">
+            <button
+              onClick={() => setCustomerTab("select")}
+              className={`flex-1 text-center py-1.5 rounded-lg text-2xs font-extrabold uppercase tracking-wider transition-all ${
+                customerTab === "select" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-950"
+              }`}
             >
-              <option value="">Walk-in Customer (Guest)</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} (ID: #{c.id})
-                </option>
-              ))}
-            </select>
+              Select Member
+            </button>
+            <button
+              onClick={() => setCustomerTab("register")}
+              className={`flex-1 text-center py-1.5 rounded-lg text-2xs font-extrabold uppercase tracking-wider transition-all ${
+                customerTab === "register" ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-950"
+              }`}
+            >
+              New Customer +
+            </button>
           </div>
+
+          {/* Tab 1: Customer Selection */}
+          {customerTab === "select" && (
+            <div className="mt-3.5 space-y-3">
+              <div>
+                <label className="block text-4xs font-extrabold uppercase tracking-wider text-zinc-400">
+                  Assign Customer
+                </label>
+                <select
+                  value={selectedCustomerId}
+                  onChange={(e) => setSelectedCustomerId(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold"
+                >
+                  <option value="">Walk-in Customer (Guest)</option>
+                  {customers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} (ID: #{c.id}) {c.is_value_member ? "⭐" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Loyalty Status Card */}
+              {customerObj && (
+                <div className={`rounded-xl border p-3 flex flex-col gap-1.5 text-xs transition-all ${
+                  customerObj.is_value_member 
+                    ? "bg-zinc-50 border-zinc-200 text-zinc-800" 
+                    : "bg-zinc-50/50 border-dashed border-zinc-200 text-zinc-500"
+                }`}>
+                  <div className="flex justify-between items-center">
+                    <span className="font-extrabold text-2xs uppercase tracking-wide">Loyalty Account</span>
+                    <span className={`text-4xs font-black uppercase px-2 py-0.5 rounded ${
+                      customerObj.is_value_member ? "bg-zinc-900 text-white" : "bg-zinc-200 text-zinc-600"
+                    }`}>
+                      {customerObj.is_value_member ? "Value Member" : "Regular Customer"}
+                    </span>
+                  </div>
+                  {customerObj.is_value_member ? (
+                    <div className="space-y-1 mt-0.5">
+                      <div className="flex justify-between text-3xs font-semibold">
+                        <span>Purchases towards 10% discount:</span>
+                        <span className="font-extrabold">{customerObj.purchases_count} / 3</span>
+                      </div>
+                      {/* Cycle Progress bar */}
+                      <div className="h-1.5 w-full bg-zinc-200 rounded-full overflow-hidden mt-1 flex gap-0.5">
+                        <div className={`h-full flex-1 ${customerObj.purchases_count >= 1 ? "bg-zinc-900" : "bg-transparent"}`} />
+                        <div className={`h-full flex-1 ${customerObj.purchases_count >= 2 ? "bg-zinc-900" : "bg-transparent"}`} />
+                        <div className={`h-full flex-1 ${customerObj.purchases_count >= 3 ? "bg-zinc-900" : "bg-transparent"}`} />
+                      </div>
+                      {isEligibleForDiscount ? (
+                        <p className="text-emerald-700 font-extrabold text-3xs pt-1 flex items-center gap-1 uppercase tracking-wider animate-pulse">
+                          🎉 10% Loyalty Discount Applied on this Order!
+                        </p>
+                      ) : (
+                        <p className="text-3xs font-medium text-zinc-400 mt-1">
+                          {3 - customerObj.purchases_count} more full-price purchase(s) until discount reward.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-3xs font-medium mt-0.5">
+                      Regular account. Register as a Value Member to unlock 10% discount rewards!
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 2: New Customer Form */}
+          {customerTab === "register" && (
+            <form onSubmit={handleAddCustomer} className="mt-3.5 space-y-2.5">
+              {newCustomerError && (
+                <p className="text-3xs text-red-500 font-bold bg-red-50 border border-red-200 p-1.5 rounded">
+                  ⚠️ {newCustomerError}
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-4xs font-extrabold uppercase tracking-wider text-zinc-400">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-2xs outline-none text-zinc-900 focus:border-zinc-500 font-semibold"
+                    placeholder="e.g. Diya Iyer"
+                  />
+                </div>
+                <div>
+                  <label className="block text-4xs font-extrabold uppercase tracking-wider text-zinc-400">Phone</label>
+                  <input
+                    type="text"
+                    value={newPhone}
+                    onChange={(e) => setNewPhone(e.target.value)}
+                    className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-2xs outline-none text-zinc-900 focus:border-zinc-500 font-semibold"
+                    placeholder="e.g. 98400-XXXXX"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-4xs font-extrabold uppercase tracking-wider text-zinc-400">Address (Chennai)</label>
+                <input
+                  type="text"
+                  required
+                  value={newAddress}
+                  onChange={(e) => setNewAddress(e.target.value)}
+                  className="mt-1 w-full rounded border border-zinc-200 px-2 py-1 text-2xs outline-none text-zinc-900 focus:border-zinc-500 font-semibold"
+                  placeholder="e.g. 12, Kasturibai Nagar, Adyar"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 pt-1.5">
+                <input
+                  type="checkbox"
+                  id="value_member_check"
+                  checked={newIsValueMember}
+                  onChange={(e) => setNewIsValueMember(e.target.checked)}
+                  className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-950 h-3.5 w-3.5"
+                />
+                <label htmlFor="value_member_check" className="text-3xs font-extrabold uppercase text-zinc-600 cursor-pointer">
+                  Join Loyalty Program as "Value Member"
+                </label>
+              </div>
+              <button
+                type="submit"
+                disabled={newCustomerLoading}
+                className="w-full rounded bg-zinc-900 text-white font-extrabold text-2xs uppercase tracking-wider py-2 hover:bg-zinc-800 transition-all shadow disabled:opacity-50"
+              >
+                {newCustomerLoading ? "Registering..." : "Register Customer"}
+              </button>
+            </form>
+          )}
 
           {/* Cart Items List */}
           <div className="flex-1 overflow-y-auto mt-6 pr-1 space-y-4">
@@ -480,9 +682,22 @@ export default function BillingPage() {
               </div>
             )}
 
+            <div className="space-y-1.5 text-xs text-zinc-600 border-b border-zinc-100 pb-3">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{cartSubtotal.toFixed(2)}</span>
+              </div>
+              {loyaltyDiscount > 0 && (
+                <div className="flex justify-between text-emerald-600 font-bold">
+                  <span>Loyalty Discount (10% - 4th Buy)</span>
+                  <span>-₹{loyaltyDiscount.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-between text-base font-extrabold text-zinc-900 py-3">
               <span>Total Amount</span>
-              <span>₹{cartSubtotal.toFixed(2)}</span>
+              <span>₹{checkoutTotal.toFixed(2)}</span>
             </div>
 
             <button
@@ -515,6 +730,9 @@ export default function BillingPage() {
                 {completedSale.customerAddress && (
                   <p className="whitespace-normal leading-tight"><b>ADDRESS:</b> {completedSale.customerAddress}</p>
                 )}
+                {completedSale.discountAmount > 0 && (
+                  <p className="text-emerald-700 font-bold"><b>MEMBERSHIP:</b> Value Member (Discount Applied)</p>
+                )}
                 <p><b>OPERATOR:</b> Cashier Terminal #1</p>
               </div>
 
@@ -538,8 +756,14 @@ export default function BillingPage() {
               <div className="py-4 text-right space-y-1 text-sm font-bold">
                 <div className="flex justify-between">
                   <span>SUBTOTAL:</span>
-                  <span>₹{completedSale.totalAmount.toFixed(2)}</span>
+                  <span>₹{(completedSale.totalAmount + completedSale.discountAmount).toFixed(2)}</span>
                 </div>
+                {completedSale.discountAmount > 0 && (
+                  <div className="flex justify-between text-emerald-700">
+                    <span>DISCOUNT (10%):</span>
+                    <span>-₹{completedSale.discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between border-t border-zinc-200 pt-2 text-base">
                   <span>TOTAL:</span>
                   <span>₹{completedSale.totalAmount.toFixed(2)}</span>
@@ -552,7 +776,7 @@ export default function BillingPage() {
               </div>
             </div>
 
-            {/* Modal Actions (Hidden during print via CSS) */}
+            {/* Modal Actions */}
             <div className="bg-zinc-50 px-6 py-4 flex gap-3 border-t border-zinc-100 justify-end">
               <button
                 onClick={handlePrint}

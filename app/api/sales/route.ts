@@ -17,8 +17,9 @@ export async function GET(request: Request) {
       .select(`
         id,
         total_amount,
+        discount_amount,
         sale_date,
-        customer:customers(id, name, phone, address),
+        customer:customers(id, name, phone, address, is_value_member, purchases_count),
         user:users(name),
         sale_items(
           id,
@@ -42,8 +43,9 @@ export async function GET(request: Request) {
     .select(`
       id,
       total_amount,
+      discount_amount,
       sale_date,
-      customer:customers(id, name, phone, address),
+      customer:customers(id, name, phone, address, is_value_member, purchases_count),
       user:users(name)
     `)
     .order("sale_date", { ascending: false });
@@ -121,6 +123,38 @@ export async function POST(request: Request) {
       calculatedTotal += Number(dbProduct.price) * cartItem.quantity;
     }
 
+    // --- Loyalty Reward logic ---
+    let discountAmount = 0;
+    let finalTotal = calculatedTotal;
+
+    if (customer_id) {
+      const { data: customerData, error: customerErr } = await supabase
+        .from("customers")
+        .select("id, is_value_member, purchases_count")
+        .eq("id", customer_id)
+        .single();
+
+      if (!customerErr && customerData && customerData.is_value_member) {
+        if (customerData.purchases_count >= 3) {
+          // 4th purchase: apply 10% discount!
+          discountAmount = Number((calculatedTotal * 0.10).toFixed(2));
+          finalTotal = calculatedTotal - discountAmount;
+
+          // Reset purchases count to 0
+          await supabase
+            .from("customers")
+            .update({ purchases_count: 0 })
+            .eq("id", customer_id);
+        } else {
+          // Increment purchases count
+          await supabase
+            .from("customers")
+            .update({ purchases_count: customerData.purchases_count + 1 })
+            .eq("id", customer_id);
+        }
+      }
+    }
+
     // 4. Create the sale header record
     const { data: saleData, error: saleError } = await supabase
       .from("sales")
@@ -128,7 +162,8 @@ export async function POST(request: Request) {
         {
           customer_id: customer_id || null,
           user_id: defaultUserId,
-          total_amount: calculatedTotal,
+          total_amount: finalTotal,
+          discount_amount: discountAmount,
           sale_date: new Date().toISOString(),
         },
       ])
@@ -186,7 +221,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       sale_id: saleId,
-      total_amount: calculatedTotal,
+      total_amount: finalTotal,
+      discount_amount: discountAmount,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });

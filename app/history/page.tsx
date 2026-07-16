@@ -17,6 +17,7 @@ type UserRelation = {
 type SaleSummary = {
   id: number;
   total_amount: number;
+  discount_amount: number;
   sale_date: string;
   customer: CustomerRelation;
   user: UserRelation;
@@ -34,6 +35,7 @@ type SaleItemDetail = {
 type SaleDetail = {
   id: number;
   total_amount: number;
+  discount_amount: number;
   sale_date: string;
   customer: CustomerRelation;
   user: UserRelation;
@@ -265,6 +267,19 @@ export default function HistoryPage() {
                 </div>
 
                 {/* Total */}
+                <div className="space-y-1 border-b border-dashed border-zinc-200 pb-3 text-3xs text-zinc-700">
+                  <div className="flex justify-between">
+                    <span>SUBTOTAL:</span>
+                    <span>₹{(Number(selectedSaleDetail.total_amount) + Number(selectedSaleDetail.discount_amount)).toFixed(2)}</span>
+                  </div>
+                  {Number(selectedSaleDetail.discount_amount) > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-bold">
+                      <span>LOYALTY DISCOUNT (10%):</span>
+                      <span>-₹{Number(selectedSaleDetail.discount_amount).toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-between font-extrabold text-sm text-right pt-1">
                   <span>TOTAL:</span>
                   <span>₹{Number(selectedSaleDetail.total_amount).toFixed(2)}</span>

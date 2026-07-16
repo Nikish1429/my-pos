@@ -30,6 +30,8 @@ create table customers (
   name text not null,
   phone text,
   address text not null,
+  is_value_member boolean not null default false,
+  purchases_count integer not null default 0,
   created_at timestamptz default now()
 );
 
@@ -39,6 +41,7 @@ create table sales (
   customer_id bigint references customers(id) on delete set null,
   user_id bigint references users(id) on delete set null,
   total_amount numeric(10, 2) not null default 0,
+  discount_amount numeric(10, 2) not null default 0,
   sale_date timestamptz default now()
 );
 
@@ -119,38 +122,38 @@ insert into products (name, category, price, stock_quantity) values
   ('Samosa (2 pcs)', 'Snacks', 40.00, 120),
   ('Paneer Puff', 'Snacks', 60.00, 80);
 
--- Insert 30 customers (Indian Names & Chennai Addresses)
-insert into customers (name, phone, address) values
-  ('Aarav Sharma', '98100-12345', '12, Kasturibai Nagar, Adyar, Chennai - 600020'),
-  ('Aditya Patel', '98200-23456', '45, Usman Road, T. Nagar, Chennai - 600017'),
-  ('Vihaan Gupta', '98300-34567', '78, 100 Feet Bypass Road, Velachery, Chennai - 600042'),
-  ('Diya Iyer', '98400-45678', '89, Kutchery Road, Mylapore, Chennai - 600004'),
-  ('Ananya Reddy', '98500-56789', '34, Shanthi Colony, Anna Nagar, Chennai - 600040'),
-  ('Rahul Verma', '98600-67890', '56, Gandhi Nagar Main Road, Adyar, Chennai - 600020'),
-  ('Priya Nair', '98700-78901', '102, Baby Nagar, Velachery, Chennai - 600042'),
-  ('Amit Singh', '98800-89012', '12, G.N. Chetty Road, T. Nagar, Chennai - 600017'),
-  ('Rajesh Gupta', '98900-90123', '4, Luz Church Road, Mylapore, Chennai - 600004'),
-  ('Siddharth Malhotra', '98000-01234', '5, 2nd Avenue, Anna Nagar, Chennai - 600040'),
-  ('Neha Sharma', '98111-12345', '71, L.B. Road, Adyar, Chennai - 600020'),
-  ('Vikram Rao', '98222-23456', '230, Taramani Link Road, Velachery, Chennai - 600042'),
-  ('Sneha Iyer', '98333-34567', '44, Royapettah High Road, Mylapore, Chennai - 600004'),
-  ('Kabir Bose', '98444-45678', '8, Pondy Bazaar, T. Nagar, Chennai - 600017'),
-  ('Rohan Deshmukh', '98555-56789', '18, West Colony, Anna Nagar, Chennai - 600040'),
-  ('Anjali Desai', '98666-67890', '9, Padmanabha Nagar, Adyar, Chennai - 600020'),
-  ('Karan Johar', '98777-78901', '55, North Usman Road, T. Nagar, Chennai - 600017'),
-  ('Divya Dutta', '98888-89012', '19, Vijaya Nagar, Velachery, Chennai - 600042'),
-  ('Varun Dhawan', '98999-90123', '28, Santhome High Road, Mylapore, Chennai - 600004'),
-  ('Alia Bhatt', '98000-11111', '67, H-Block, Anna Nagar, Chennai - 600040'),
-  ('Ranbir Kapoor', '98111-22222', '31, Shastri Nagar, Adyar, Chennai - 600020'),
-  ('Deepika Padukone', '98222-33333', '88, Dhandeeswaram Nagar, Velachery, Chennai - 600042'),
-  ('Ranveer Singh', '98333-44444', '90, Burkit Road, T. Nagar, Chennai - 600017'),
-  ('Katrina Kaif', '98444-55555', '3, Radhakrishnan Salai, Mylapore, Chennai - 600004'),
-  ('Vicky Kaushal', '98555-66666', '12, Y-Block, Anna Nagar, Chennai - 600040'),
-  ('Kiara Advani', '98666-77777', '14, Indira Nagar, Adyar, Chennai - 600020'),
-  ('Sidharth Malhotra', '98777-88888', '77, South Boag Road, T. Nagar, Chennai - 600017'),
-  ('Kriti Sanon', '98888-99999', '11, Lic Colony, Velachery, Chennai - 600042'),
-  ('Ayushmann Khurrana', '98999-00000', '15, Kapaleeswarar Temple Sannidhi, Mylapore, Chennai - 600004'),
-  ('Kartik Aaryan', '98000-22222', '41, Blue Stone Avenue, Anna Nagar, Chennai - 600040');
+-- -- Insert 30 customers (Indian Names & Chennai Addresses & Loyalty Program)
+insert into customers (name, phone, address, is_value_member, purchases_count) values
+  ('Aarav Sharma', '98100-12345', '12, Kasturibai Nagar, Adyar, Chennai - 600020', true, 1),
+  ('Aditya Patel', '98200-23456', '45, Usman Road, T. Nagar, Chennai - 600017', false, 0),
+  ('Vihaan Gupta', '98300-34567', '78, 100 Feet Bypass Road, Velachery, Chennai - 600042', false, 0),
+  ('Diya Iyer', '98400-45678', '89, Kutchery Road, Mylapore, Chennai - 600004', true, 3),
+  ('Ananya Reddy', '98500-56789', '34, Shanthi Colony, Anna Nagar, Chennai - 600040', true, 0),
+  ('Rahul Verma', '98600-67890', '56, Gandhi Nagar Main Road, Adyar, Chennai - 600020', false, 0),
+  ('Priya Nair', '98700-78901', '102, Baby Nagar, Velachery, Chennai - 600042', true, 2),
+  ('Amit Singh', '98800-89012', '12, G.N. Chetty Road, T. Nagar, Chennai - 600017', false, 0),
+  ('Rajesh Gupta', '98900-90123', '4, Luz Church Road, Mylapore, Chennai - 600004', true, 1),
+  ('Siddharth Malhotra', '98000-01234', '5, 2nd Avenue, Anna Nagar, Chennai - 600040', false, 0),
+  ('Neha Sharma', '98111-12345', '71, L.B. Road, Adyar, Chennai - 600020', true, 3),
+  ('Vikram Rao', '98222-23456', '230, Taramani Link Road, Velachery, Chennai - 600042', false, 0),
+  ('Sneha Iyer', '98333-34567', '44, Royapettah High Road, Mylapore, Chennai - 600004', true, 2),
+  ('Kabir Bose', '98444-45678', '8, Pondy Bazaar, T. Nagar, Chennai - 600017', false, 0),
+  ('Rohan Deshmukh', '98555-56789', '18, West Colony, Anna Nagar, Chennai - 600040', false, 0),
+  ('Anjali Desai', '98666-67890', '9, Padmanabha Nagar, Adyar, Chennai - 600020', false, 0),
+  ('Karan Johar', '98777-78901', '55, North Usman Road, T. Nagar, Chennai - 600017', false, 0),
+  ('Divya Dutta', '98888-89012', '19, Vijaya Nagar, Velachery, Chennai - 600042', false, 0),
+  ('Varun Dhawan', '98999-90123', '28, Santhome High Road, Mylapore, Chennai - 600004', false, 0),
+  ('Alia Bhatt', '98000-11111', '67, H-Block, Anna Nagar, Chennai - 600040', true, 0),
+  ('Ranbir Kapoor', '98111-22222', '31, Shastri Nagar, Adyar, Chennai - 600020', false, 0),
+  ('Deepika Padukone', '98222-33333', '88, Dhandeeswaram Nagar, Velachery, Chennai - 600042', true, 1),
+  ('Ranveer Singh', '98333-44444', '90, Burkit Road, T. Nagar, Chennai - 600017', false, 0),
+  ('Katrina Kaif', '98444-55555', '3, Radhakrishnan Salai, Mylapore, Chennai - 600004', true, 2),
+  ('Vicky Kaushal', '98555-66666', '12, Y-Block, Anna Nagar, Chennai - 600040', false, 0),
+  ('Kiara Advani', '98666-77777', '14, Indira Nagar, Adyar, Chennai - 600020', true, 0),
+  ('Sidharth Malhotra', '98777-88888', '77, South Boag Road, T. Nagar, Chennai - 600017', false, 0),
+  ('Kriti Sanon', '98888-99999', '11, Lic Colony, Velachery, Chennai - 600042', false, 0),
+  ('Ayushmann Khurrana', '98999-00000', '15, Kapaleeswarar Temple Sannidhi, Mylapore, Chennai - 600004', false, 0),
+  ('Kartik Aaryan', '98000-22222', '41, Blue Stone Avenue, Anna Nagar, Chennai - 600040', false, 0);
 
 -- Generate 400 sales dynamically over the last 6 months
 do $$
@@ -164,13 +167,19 @@ declare
   v_sale_date timestamptz;
   v_items_count integer;
   v_total numeric(10, 2);
+  v_is_value_member boolean;
+  v_purchases_count integer;
+  v_discount numeric(10, 2);
 begin
   for i in 1..400 loop
     -- Random customer (80% chance of registered customer, 20% anonymous walk-in)
     if random() < 0.8 then
-      select id into v_customer_id from customers order by random() limit 1;
+      select id, is_value_member, purchases_count into v_customer_id, v_is_value_member, v_purchases_count 
+      from customers order by random() limit 1;
     else
       v_customer_id := null;
+      v_is_value_member := false;
+      v_purchases_count := 0;
     end if;
     
     -- Random cashier or admin who checked out the sale
@@ -179,20 +188,20 @@ begin
     -- Random date in the last 6 months (180 days)
     v_sale_date := now() - (random() * interval '180 days');
     
-    -- Insert base sale record
-    insert into sales (customer_id, user_id, total_amount, sale_date)
-    values (v_customer_id, v_user_id, 0, v_sale_date)
+    -- Insert base sale record (placeholder for total, updated below)
+    insert into sales (customer_id, user_id, total_amount, discount_amount, sale_date)
+    values (v_customer_id, v_user_id, 0, 0, v_sale_date)
     returning id into v_sale_id;
     
-    -- Generate 1 to 4 line items per receipt
+    -- Random number of items in transaction (1 to 4)
     v_items_count := floor(random() * 4) + 1;
     v_total := 0;
     
     for j in 1..v_items_count loop
       select id, price into v_product_id, v_price from products order by random() limit 1;
-      v_quantity := floor(random() * 3) + 1; -- 1 to 3 items of this product
+      v_quantity := floor(random() * 3) + 1;
       
-      -- Avoid inserting duplicate items of same product in the same sale receipt
+      -- Avoid inserting duplicate products in the same sale
       if not exists (select 1 from sale_items where sale_id = v_sale_id and product_id = v_product_id) then
         insert into sale_items (sale_id, product_id, quantity, unit_price)
         values (v_sale_id, v_product_id, v_quantity, v_price);
@@ -201,7 +210,22 @@ begin
       end if;
     end loop;
     
-    -- Update the final total_amount for the sale
-    update sales set total_amount = v_total where id = v_sale_id;
+    -- Calculate loyalty discount if applicable
+    v_discount := 0;
+    if v_customer_id is not null and v_is_value_member then
+      if v_purchases_count >= 3 then
+        v_discount := round(v_total * 0.10, 2);
+        v_total := v_total - v_discount;
+        
+        -- Reset purchases count
+        update customers set purchases_count = 0 where id = v_customer_id;
+      else
+        -- Increment purchases count
+        update customers set purchases_count = purchases_count + 1 where id = v_customer_id;
+      end if;
+    end if;
+    
+    -- Update sale totals
+    update sales set total_amount = v_total, discount_amount = v_discount where id = v_sale_id;
   end loop;
 end $$;
