@@ -137,6 +137,11 @@ export default async function Home() {
                 Go to Inventory Manager
               </Link>
             </li>
+            <li>
+              <Link href="/billing" className="font-semibold text-zinc-900 underline hover:text-zinc-600">
+                Go to Billing Terminal (Checkout)
+              </Link>
+            </li>
           </ol>
         </div>
       </main>
