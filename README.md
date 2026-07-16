@@ -1,55 +1,54 @@
-# My-POS — Modern Point of Sale System & Analytics Dashboard
+# my-POS — Next-Gen Smart POS & Retail Intelligence Cockpit
 
-A sleek, full-stack Next.js and Supabase-powered Point of Sale (POS) system designed for retail shops, coupled with an interactive Power BI business intelligence dashboard. 
+A premium, full-stack Next.js and Supabase-powered Point of Sale (POS) system designed for busy supermarkets. It integrates advanced business logic, real-time analytics, automated inventory intelligence, anomaly auditing, and a custom natural-language Chatbot.
 
-This application provides a complete solution for processing transactions, managing inventory, predicting sales, and visualizing retail analytics.
-
----
-
-## 📸 Screenshots
-
-*Once you capture your screenshots, save them as `dashboard.png`, `billing.png`, `inventory.png`, and `analytics.png` inside the `public/screenshots/` folder to display them here:*
-
-<table>
-  <tr>
-    <td align="center"><b>Dashboard & Sales Forecast</b></td>
-    <td align="center"><b>Billing Screen & Cart</b></td>
-  </tr>
-  <tr>
-    <td><img src="public/screenshots/dashboard.png" alt="Dashboard Screen" width="400"/></td>
-    <td><img src="public/screenshots/billing.png" alt="Billing Screen" width="400"/></td>
-  </tr>
-  <tr>
-    <td align="center"><b>Inventory Management (Admin Only)</b></td>
-    <td align="center"><b>Power BI Analytics Report</b></td>
-  </tr>
-  <tr>
-    <td><img src="public/screenshots/inventory.png" alt="Inventory Screen" width="400"/></td>
-    <td><img src="public/screenshots/analytics.png" alt="Power BI Analytics" width="400"/></td>
-  </tr>
-</table>
+🖥️ **Live App URL**: [https://my-pos-lyart.vercel.app/](https://my-pos-lyart.vercel.app/)  
+🤖 **Intelligence Cockpit & Chatbot**: [https://my-pos-lyart.vercel.app/ai-manager](https://my-pos-lyart.vercel.app/ai-manager)
 
 ---
 
-## ✨ Features
+## 🔑 Operator Sign-In Credentials
 
-- 🔐 **Role-Based Access Control (RBAC)**: Secure authentication handled via Supabase Auth. Dual-role system separating **Admins** (who can access everything including inventory management) and **Cashiers** (restricted to billing, history, and the dashboard).
-- 🛒 **Dynamic Billing & Checkout**: A real-time cart with live total calculations. Completing a sale automatically decrements product stock and saves details across linked transactions tables in a single database action.
-- 📦 **Inventory Control**: Comprehensive product list with live stock numbers. Auto-highlights products low on stock (under 10 units) to alert store administrators.
-- 📜 **Transaction History**: Complete record of all past sales sorted by date (newest first). Click any transaction to instantly view its itemized receipt details.
-- 🧠 **Smart Features (Plain JS, No Heavy Libraries)**:
-  - **Sales Prediction**: Runs a 7-day Simple Moving Average (SMA) of daily revenue to forecast tomorrow's sales on the main dashboard.
-  - **Product Recommendations**: Analyzes item co-occurrence in past orders to suggest "Frequently Bought Together" products on the checkout screen.
-- 📊 **Power BI Analytics Dashboard**: A rich, single-page BI report highlighting monthly revenue trends, sales by category, top customers, regional performance, and key retail metrics (Total Revenue, Average Order Value).
+Sign in directly on the [Login Screen](https://my-pos-lyart.vercel.app/login) using these pre-configured project credentials:
+
+* **Admin Role**: `nikishkumaranr@gmail.com`
+* **Cashier Role**: `nikishkumaran5@gmail.com`
+* **Password**: `Pos@123`
+
+*(Note: Roles are stored securely in the PostgreSQL public database. If you add new accounts in Supabase Auth, remember to insert them into the `users` table with their corresponding `role` value of `'admin'` or `'cashier'`)*
+
+---
+
+## ✨ Features & Architecture
+
+### 1. 🛒 Dynamic Checkout & Sound Effects
+* **Vibrant Interface**: Highly polished glassmorphic UI matching premium color guides.
+* **Audio Interactivity**: Realistic scanner and cart sounds trigger on cart addition and checkout completion.
+* **Smart Search**: Real-time product search list (removed scan placeholder mock for clean production usage).
+
+### 2. 🎗️ Loyalty Reward System (Value Members)
+* **Value Members Tab**: Separate toggle/modal to view and capture name, ID, and consent of loyalty participants.
+* **5% Loyalty Cycle**: Applies a 5% discount on the total bill. Follows a strict cycle: member makes 3 full-price purchases, and their 4th purchase automatically receives the discounted price.
+* **Invoice Transparency**: Discounts are calculated dynamically and printed directly on the receipt/invoice block.
+
+### 3. 🤖 AI Chatbot (NLP Intelligence Engine)
+* **Sunset Theme Colors**: Beautiful interface sharing the custom sky-pink-purple sunrise gradient of the login page.
+* **Dynamic Database Queries**: Custom query parsing engine that dynamically extracts metrics, revenue statistics, customer types, and aggregates from your live Supabase database.
+* **Calculations & Math**: Resolves arbitrary math expressions (e.g., `1500 * 0.10`) directly within the chat window.
+
+### 4. 📈 Retail Analytics & Inventory Control
+* **Demand Forecasting**: Runs automated 7-day projections scaled at a 15x supermarket density velocity to display realistic velocities during project presentations.
+* **Real-time Anomaly Logs**: Scans transactions in real-time, automatically auditing and logging suspicious bulk order sizes or volume anomalies.
+* **Inventory Alerts**: Identifies fast-moving vs slow-moving inventory and prints automated restock hints.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Framework**: Next.js (App Router, TypeScript)
-* **Styling**: Tailwind CSS
-* **Database & Auth**: Supabase (PostgreSQL, Supabase Auth)
-* **Charts & Visuals**: Recharts (web app) & Power BI Desktop (analytics dashboard)
+* **Frontend Framework**: Next.js 16 (App Router, TypeScript, React 19)
+* **UI/Styles**: Tailwind CSS, Vanilla CSS, Lucide Icons, Glassmorphism
+* **Database & Auth**: Supabase (PostgreSQL, Supabase Auth, Row-Level Security)
+* **Charts**: Recharts (interactive high-contrast visualizer)
 * **Deployment**: Vercel
 
 ---
@@ -68,9 +67,9 @@ npm install
 ```
 
 ### 3. Configure Environment Variables
-Create a `.env.local` file in the root of your project:
+Create a `.env.local` file in the root directory:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
@@ -78,4 +77,24 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the app!
+Open [http://localhost:3000](http://localhost:3000) to view your local Point of Sale system.
+
+---
+
+## 💾 Database Setup (SQL Query)
+
+To assign database roles to your login operators, execute this query in your **Supabase SQL Editor**:
+
+```sql
+-- 1. Create/Update Admin User Role
+insert into public.users (name, email, role)
+values ('Nikish Kumaran (Admin)', 'nikishkumaranr@gmail.com', 'admin')
+on conflict (email) 
+do update set role = 'admin', name = 'Nikish Kumaran (Admin)';
+
+-- 2. Create/Update Cashier User Role
+insert into public.users (name, email, role)
+values ('Nikish Kumaran (Cashier)', 'nikishkumaran5@gmail.com', 'cashier')
+on conflict (email) 
+do update set role = 'cashier', name = 'Nikish Kumaran (Cashier)';
+```
