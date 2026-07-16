@@ -146,7 +146,7 @@ export default function Home() {
             {role === "admin" ? (
               <Link
                 href="/inventory"
-                className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99] sm:col-span-2"
+                className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
               >
                 <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,11 +155,11 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="font-bold text-zinc-950 text-sm">Inventory Manager (Admin Only)</p>
-                  <p className="text-2xs text-zinc-500 mt-0.5">Control pricing, stock quantities, add/edit products catalog.</p>
+                  <p className="text-2xs text-zinc-500 mt-0.5">Control pricing, stock quantities, catalog.</p>
                 </div>
               </Link>
             ) : (
-              <div className="flex items-center gap-4 border border-zinc-200/60 rounded-xl p-5 bg-zinc-100/50 sm:col-span-2">
+              <div className="flex items-center gap-4 border border-zinc-200/60 rounded-xl p-5 bg-zinc-100/50">
                 <div className="rounded-lg bg-zinc-200 p-3 text-zinc-400">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -167,10 +167,25 @@ export default function Home() {
                 </div>
                 <div>
                   <p className="font-bold text-zinc-400 text-sm">Inventory Manager (Admin Only)</p>
-                  <p className="text-2xs text-zinc-400 mt-0.5">Sign in as an administrator to unlock product catalog management controls.</p>
+                  <p className="text-2xs text-zinc-400 mt-0.5">Sign in as an administrator to unlock.</p>
                 </div>
               </div>
             )}
+
+            <Link
+              href="/analytics"
+              className="flex items-center gap-4 border border-zinc-200 rounded-xl p-5 hover:border-zinc-500 hover:shadow-md transition-all bg-white group active:scale-[0.99]"
+            >
+              <div className="rounded-lg bg-zinc-100 p-3 text-zinc-900 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-bold text-zinc-950 text-sm">Store Analytics</p>
+                <p className="text-2xs text-zinc-500 mt-0.5">Visualize sales trends, best sellers, regional charts.</p>
+              </div>
+            </Link>
           </div>
         </div>
 
