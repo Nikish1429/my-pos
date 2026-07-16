@@ -58,7 +58,7 @@ export default function AIManagerPage() {
   const [chatLog, setChatLog] = useState<{ role: "user" | "assistant"; text: string }[]>([
     {
       role: "assistant",
-      text: "Hello! I am the my-POS Intelligence Assistant. You can ask me natural language queries about your sales history, or ask me to perform math calculations/averages related to your data! Try asking:\n- 'Calculate 5% of 25000'\n- 'What is our total revenue?'\n- 'Which product sold the most this month?'\n- 'Show revenue in June'\n- 'How many sales total?'",
+      text: "Hello! I am the my-POS Chatbot. You can ask me natural language queries about your sales history, or ask me to perform math calculations/averages related to your data! Try asking:\n- 'Calculate 5% of 25000'\n- 'What is our total revenue?'\n- 'Which product sold the most this month?'\n- 'Show revenue in June'\n- 'How many sales total?'",
     },
   ]);
 
@@ -361,11 +361,11 @@ export default function AIManagerPage() {
       {/* Main layout in a balanced grid */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
         
-        {/* Row 1: Chatbot, Demand Forecasting, Anomaly Logs (Equal Height: 440px) */}
+        {/* Row 1: Chatbot, Demand Forecasting, Anomaly Logs (Equal Height: 280px) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Card 1: Chatbot (Sunrise/Sunset Gradient Theme Matching Login) */}
-          <div className="bg-gradient-to-br from-sky-400 via-pink-500 via-purple-600 to-indigo-950 border border-white/20 rounded-3xl p-5 shadow-xl flex flex-col h-[440px] text-white">
+          <div className="bg-gradient-to-br from-sky-400 via-pink-500 via-purple-600 to-indigo-950 border border-white/20 rounded-3xl p-5 shadow-xl flex flex-col h-[280px] text-white">
             <div className="border-b border-white/20 pb-3 flex items-center justify-between">
               <h2 className="text-xs font-black uppercase tracking-widest text-white flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-white animate-pulse" /> Chatbot
@@ -376,14 +376,14 @@ export default function AIManagerPage() {
             </div>
 
             {/* Chat log messages area */}
-            <div className="flex-1 overflow-y-auto mt-4 space-y-4 pr-1 text-2xs leading-relaxed scrollbar-none">
+            <div className="flex-1 overflow-y-auto mt-3 space-y-3 pr-1 text-2xs leading-relaxed scrollbar-none">
               {chatLog.map((log, idx) => (
                 <div
                   key={idx}
-                  className={`flex flex-col rounded-2xl p-3 shadow-md max-w-[85%] ${
+                  className={`flex flex-col rounded-2xl p-2.5 shadow-md max-w-[85%] ${
                     log.role === "user"
-                      ? "bg-white text-zinc-950 self-end ml-auto"
-                      : "bg-black/35 border border-white/10 text-zinc-100 self-start mr-auto"
+                      ? "bg-white text-purple-950 self-end ml-auto font-bold"
+                      : "bg-purple-900/45 border border-purple-300/25 text-white self-start mr-auto"
                   }`}
                 >
                   <p className="whitespace-pre-wrap font-semibold">{log.text}</p>
@@ -392,25 +392,25 @@ export default function AIManagerPage() {
             </div>
 
             {/* Chat Form */}
-            <form onSubmit={handleChatSubmit} className="mt-4 pt-3 border-t border-white/20 flex gap-2">
+            <form onSubmit={handleChatSubmit} className="mt-3 pt-2.5 border-t border-white/20 flex gap-2">
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Ask chatbot, e.g. 'Show June sales'"
-                className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-2xs outline-none focus:border-white focus:bg-white/20 transition-all text-white font-semibold placeholder-white/70"
+                className="flex-1 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-2xs outline-none focus:border-white focus:bg-white/20 transition-all text-white font-semibold placeholder-white/70"
               />
               <button
                 type="submit"
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-purple-950 shadow-md hover:bg-zinc-100 transition-all active:scale-95"
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-white text-purple-950 shadow-md hover:bg-zinc-100 transition-all active:scale-95"
               >
-                <Send className="h-3.5 w-3.5 text-indigo-900 fill-indigo-900" />
+                <Send className="h-3 w-3 text-indigo-900 fill-indigo-900" />
               </button>
             </form>
           </div>
 
           {/* Card 2: Demand Forecasting (Scrollable Table, Equal Height) */}
-          <div className="bg-white border border-zinc-200 border-t-4 border-t-emerald-500 rounded-3xl p-5 shadow-sm flex flex-col h-[440px]">
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-emerald-500 rounded-3xl p-5 shadow-sm flex flex-col h-[280px]">
             <h2 className="text-xs font-black uppercase tracking-wider text-emerald-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-emerald-600" /> Product Demand Forecasting
             </h2>
@@ -449,7 +449,7 @@ export default function AIManagerPage() {
           </div>
 
           {/* Card 3: Anomaly Detection List (Scrollable Logs, Equal Height) */}
-          <div className="bg-white border border-zinc-200 border-t-4 border-t-red-500 rounded-3xl p-5 shadow-sm flex flex-col h-[440px]">
+          <div className="bg-white border border-zinc-200 border-t-4 border-t-red-500 rounded-3xl p-5 shadow-sm flex flex-col h-[280px]">
             <h2 className="text-xs font-black uppercase tracking-wider text-red-800 border-b border-zinc-100 pb-3 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-600" /> Real-time Anomaly Logs
             </h2>
