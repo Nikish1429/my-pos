@@ -1,7 +1,7 @@
 id,name,email,role
-1,"Alice Smith","alice@mypos.com","admin"
+1,"Admin User","admin@mypos.com","admin"
 2,"Bob Jones","bob@mypos.com","admin"
-3,"Charlie Brown","charlie@mypos.com","cashier"
+3,"Cashier User","cashier@mypos.com","cashier"
 4,"David Miller","david@mypos.com","cashier"
 5,"Emma Wilson","emma@mypos.com","cashier"
 6,"Frank Taylor","frank@mypos.com","cashier"

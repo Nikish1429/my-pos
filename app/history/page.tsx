@@ -274,7 +274,7 @@ export default function HistoryPage() {
                   </div>
                   {Number(selectedSaleDetail.discount_amount) > 0 && (
                     <div className="flex justify-between text-emerald-700 font-bold">
-                      <span>LOYALTY DISCOUNT (10%):</span>
+                      <span>LOYALTY DISCOUNT (5%):</span>
                       <span>-₹{Number(selectedSaleDetail.discount_amount).toFixed(2)}</span>
                     </div>
                   )}

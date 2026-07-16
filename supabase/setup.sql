@@ -79,9 +79,9 @@ create policy "Allow public update" on products for update using (true);
 
 -- Insert 10 users (Admins + Cashiers)
 insert into users (name, email, role) values
-  ('Alice Smith', 'alice@mypos.com', 'admin'),
+  ('Admin User', 'admin@mypos.com', 'admin'),
   ('Bob Jones', 'bob@mypos.com', 'admin'),
-  ('Charlie Brown', 'charlie@mypos.com', 'cashier'),
+  ('Cashier User', 'cashier@mypos.com', 'cashier'),
   ('David Miller', 'david@mypos.com', 'cashier'),
   ('Emma Wilson', 'emma@mypos.com', 'cashier'),
   ('Frank Taylor', 'frank@mypos.com', 'cashier'),

@@ -557,7 +557,7 @@ export default function BillingPage() {
                   {customerObj.is_value_member ? (
                     <div className="space-y-1 mt-0.5">
                       <div className="flex justify-between text-3xs font-semibold">
-                        <span>Purchases towards 10% discount:</span>
+                        <span>Purchases towards 5% discount:</span>
                         <span className="font-extrabold">{customerObj.purchases_count} / 3</span>
                       </div>
                       {/* Cycle Progress bar */}
@@ -568,7 +568,7 @@ export default function BillingPage() {
                       </div>
                       {isEligibleForDiscount ? (
                         <p className="text-emerald-700 font-extrabold text-3xs pt-1 flex items-center gap-1 uppercase tracking-wider animate-pulse">
-                          🎉 10% Loyalty Discount Applied on this Order!
+                          🎉 5% Loyalty Discount Applied on this Order!
                         </p>
                       ) : (
                         <p className="text-3xs font-medium text-zinc-400 mt-1">
@@ -578,7 +578,7 @@ export default function BillingPage() {
                     </div>
                   ) : (
                     <p className="text-3xs font-medium mt-0.5">
-                      Regular account. Register as a Value Member to unlock 10% discount rewards!
+                      Regular account. Register as a Value Member to unlock 5% discount rewards!
                     </p>
                   )}
                 </div>
@@ -712,7 +712,7 @@ export default function BillingPage() {
               </div>
               {loyaltyDiscount > 0 && (
                 <div className="flex justify-between text-emerald-600 font-bold">
-                  <span>Loyalty Discount (10% - 4th Buy)</span>
+                  <span>Loyalty Discount (5% - 4th Buy)</span>
                   <span>-₹{loyaltyDiscount.toFixed(2)}</span>
                 </div>
               )}
@@ -783,7 +783,7 @@ export default function BillingPage() {
                 </div>
                 {completedSale.discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-700">
-                    <span>DISCOUNT (10%):</span>
+                    <span>DISCOUNT (5%):</span>
                     <span>-₹{completedSale.discountAmount.toFixed(2)}</span>
                   </div>
                 )}

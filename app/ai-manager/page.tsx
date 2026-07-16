@@ -58,7 +58,7 @@ export default function AIManagerPage() {
   const [chatLog, setChatLog] = useState<{ role: "user" | "assistant"; text: string }[]>([
     {
       role: "assistant",
-      text: "Hello! I am the my-POS Intelligence Assistant. You can ask me natural language queries about your sales history, or ask me to perform math calculations/averages related to your data! Try asking:\n- 'Calculate 10% of 25000'\n- 'What is our total revenue?'\n- 'Which product sold the most this month?'\n- 'Show revenue in June'\n- 'How many sales total?'",
+      text: "Hello! I am the my-POS Intelligence Assistant. You can ask me natural language queries about your sales history, or ask me to perform math calculations/averages related to your data! Try asking:\n- 'Calculate 5% of 25000'\n- 'What is our total revenue?'\n- 'Which product sold the most this month?'\n- 'Show revenue in June'\n- 'How many sales total?'",
     },
   ]);
 
@@ -104,12 +104,12 @@ export default function AIManagerPage() {
 
     const forecasting = Object.keys(productSalesHistory).map((name) => {
       const history = productSalesHistory[name];
-      const avgDailyQty = history.qty / 180; // normalized over 6 months
+      const avgDailyQty = (history.qty / 180) * 15; // Project 15x higher velocity for busy supermarket demo
       const nextWeekForecast = Math.round(avgDailyQty * 7);
 
       // Low stock warning (if next week's forecast is higher than hypothetical safety stock threshold)
-      const stockLevel = name.includes("Coffee") || name.includes("Chai") ? 150 : 50; // Mock current stock levels for preview
-      const isLowStockWarning = nextWeekForecast > (stockLevel * 0.8);
+      const stockLevel = name.includes("Coffee") || name.includes("Chai") ? 350 : 120; // Adjusted safety stock levels
+      const isLowStockWarning = nextWeekForecast > (stockLevel * 0.85);
 
       return {
         name,
@@ -297,7 +297,11 @@ export default function AIManagerPage() {
     else if (normalized.includes("how many sales") || normalized.includes("number of sales") || normalized.includes("total orders") || normalized.includes("transactions")) {
       reply = `📊 There are currently **${sales.length} transactions** recorded in the database.`;
     }
-    // 11. Average Sale Values
+    // 11. Loyalty System details
+    else if (normalized.includes("discount") || normalized.includes("loyalty") || normalized.includes("value member") || normalized.includes("reward") || normalized.includes("membership")) {
+      reply = `🎉 **Loyalty Reward System Details**:\n• Customer Type: **Value Members** (who consent to join).\n• Reward logic: **5% discount** on their total bill.\n• Purchase Cycle: Applied automatically on every **4th purchase** (after 3 full-price purchases).`;
+    }
+    // 12. Average Sale Values
     else if (normalized.includes("average order") || normalized.includes("average sale") || normalized.includes("average ticket")) {
       const totalRev = sales.reduce((sum, s) => sum + Number(s.total_amount), 0);
       const avg = totalRev / (sales.length || 1);

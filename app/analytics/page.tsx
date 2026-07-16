@@ -73,7 +73,7 @@ interface RawData {
   saleItems: SaleItem[];
 }
 
-const COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
+const COLORS = ["#4f46e5", "#06b6d4", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#3b82f6"];
 
 const getAreaFromAddress = (address: string | undefined): string => {
   if (!address) return "Walk-in";
@@ -598,7 +598,7 @@ export default function AnalyticsPage() {
                     <Line
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#000000"
+                      stroke="#4f46e5"
                       strokeWidth={2.5}
                       dot={(props: any) => {
                         const { cx, cy, payload } = props;
@@ -608,8 +608,8 @@ export default function AnalyticsPage() {
                             key={payload.name}
                             cx={cx}
                             cy={cy}
-                            r={isSelected ? 6 : 4}
-                            fill={isSelected ? "#000000" : "#71717a"}
+                            r={isSelected ? 7 : 4}
+                            fill={isSelected ? "#ec4899" : "#4f46e5"}
                             stroke="#fff"
                             strokeWidth={1.5}
                           />
@@ -668,8 +668,8 @@ export default function AnalyticsPage() {
                       {revenueByRegion.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={selectedRegion === entry.region ? "#18181b" : "#71717a"}
-                          opacity={selectedRegion === "All" || selectedRegion === entry.region ? 1 : 0.4}
+                          fill={COLORS[index % COLORS.length]}
+                          opacity={selectedRegion === "All" || selectedRegion === entry.region ? 1 : 0.45}
                         />
                       ))}
                     </Bar>
@@ -725,8 +725,8 @@ export default function AnalyticsPage() {
                       {topProducts.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={selectedProduct === entry.name ? "#18181b" : "#71717a"}
-                          opacity={selectedProduct === null || selectedProduct === entry.name ? 1 : 0.4}
+                          fill={COLORS[index % COLORS.length]}
+                          opacity={selectedProduct === null || selectedProduct === entry.name ? 1 : 0.45}
                         />
                       ))}
                     </Bar>

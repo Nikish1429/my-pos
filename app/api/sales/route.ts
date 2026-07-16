@@ -136,8 +136,8 @@ export async function POST(request: Request) {
 
       if (!customerErr && customerData && customerData.is_value_member) {
         if (customerData.purchases_count >= 3) {
-          // 4th purchase: apply 10% discount!
-          discountAmount = Number((calculatedTotal * 0.10).toFixed(2));
+          // 4th purchase: apply 5% discount!
+          discountAmount = Number((calculatedTotal * 0.05).toFixed(2));
           finalTotal = calculatedTotal - discountAmount;
 
           // Reset purchases count to 0
