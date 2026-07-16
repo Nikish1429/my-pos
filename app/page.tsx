@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import Link from "next/link";
 
 type Product = {
   id: number;
@@ -131,7 +132,11 @@ export default async function Home() {
               </code>{" "}
               in Supabase SQL Editor
             </li>
-            <li>Refresh this page to see your products</li>
+            <li>
+              <Link href="/inventory" className="font-semibold text-zinc-900 underline hover:text-zinc-600">
+                Go to Inventory Manager
+              </Link>
+            </li>
           </ol>
         </div>
       </main>
