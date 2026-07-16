@@ -81,10 +81,15 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters State
+  // --- DROPDOWN FILTERS STATE ---
   const [timeRange, setTimeRange] = useState<string>("all"); // all, 30, 90, 180
-  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // All, Delhi NCR, Maharashtra, Karnataka, West Bengal, Tamil Nadu, Walk-in
-  const [selectedCategory, setSelectedCategory] = useState<string>("All"); // All, Drinks, Bakery, Snacks
+
+  // --- GRAPH GRAPH-CLICK (CROSS-FILTERING) STATE ---
+  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // filter by clicking Region Bar
+  const [selectedCategory, setSelectedCategory] = useState<string>("All"); // filter by clicking Category Pie
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null); // filter by clicking Timeline point
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null); // filter by clicking Product Bar
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null); // filter by clicking Customer table row
 
   const fetchAnalytics = async () => {
     try {
@@ -108,11 +113,14 @@ export default function AnalyticsPage() {
     }
   }, [user]);
 
-  // Reset all filters
+  // Reset all filters (dropdowns and clicks)
   const resetFilters = () => {
     setTimeRange("all");
     setSelectedRegion("All");
     setSelectedCategory("All");
+    setSelectedMonth(null);
+    setSelectedProduct(null);
+    setSelectedCustomer(null);
   };
 
   // --- INTERACTIVE FILTERING & AGGREGATION ENGINE ---
@@ -120,8 +128,9 @@ export default function AnalyticsPage() {
     if (!rawData) return null;
 
     const { sales, saleItems } = rawData;
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    // 1. Filter Sales by Time Range and Region
+    // 1. Filter Sales
     const filteredSales = sales.filter((sale) => {
       // Time Range Filter
       if (timeRange !== "all") {
@@ -131,39 +140,57 @@ export default function AnalyticsPage() {
         if (saleDate < cutoff) return false;
       }
 
-      // Region Filter
+      // Region Filter (from Region Bar Chart click)
       const region = sale.customers?.region || "Walk-in";
       if (selectedRegion !== "All" && region !== selectedRegion) return false;
+
+      // Month Filter (from Line Chart point click)
+      if (selectedMonth) {
+        const date = new Date(sale.sale_date);
+        const monthLabel = `${monthNames[date.getMonth()]} ${String(date.getFullYear()).slice(-2)}`;
+        if (monthLabel !== selectedMonth) return false;
+      }
+
+      // Customer Filter (from Leaderboard row click)
+      if (selectedCustomer) {
+        const custName = sale.customers?.name || "Walk-in (Guest)";
+        if (custName !== selectedCustomer) return false;
+      }
 
       return true;
     });
 
     const filteredSaleIds = new Set(filteredSales.map((s) => s.id));
 
-    // 2. Filter Sale Items based on filtered sales and product category
+    // 2. Filter Sale Items
     const filteredSaleItems = saleItems.filter((item) => {
       // Must belong to one of the filtered sales
       if (!filteredSaleIds.has(item.sale_id)) return false;
 
-      // Category Filter
+      // Category Filter (from Category Pie Chart click)
       const category = item.products?.category || "Other";
       if (selectedCategory !== "All" && category !== selectedCategory) return false;
+
+      // Product Filter (from Best-Sellers Bar Chart click)
+      if (selectedProduct) {
+        const prodName = item.products?.name || "Unknown Product";
+        if (prodName !== selectedProduct) return false;
+      }
 
       return true;
     });
 
     const activeSaleIdsWithItems = new Set(filteredSaleItems.map((item) => item.sale_id));
 
-    // 3. Compute KPI Metrics
+    // 3. Compute KPI Metrics (Revenue, Orders, AOV)
     let totalRevenue = 0;
     let totalOrders = 0;
 
-    if (selectedCategory === "All") {
-      // Standard: Sum of whole sale totals
+    // If filtering by items specifically (Category or Product click), sum up item amounts
+    if (selectedCategory === "All" && !selectedProduct) {
       totalRevenue = filteredSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
       totalOrders = filteredSales.length;
     } else {
-      // Category Specific: Sum of matching item values
       totalRevenue = filteredSaleItems.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unit_price), 0);
       totalOrders = activeSaleIdsWithItems.size;
     }
@@ -171,9 +198,8 @@ export default function AnalyticsPage() {
 
     // 4. Group Revenue Over Time (Timeline Chart)
     const monthlyRevenueMap: { [key: string]: number } = {};
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-    if (selectedCategory === "All") {
+    
+    if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
         const date = new Date(s.sale_date);
         const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -181,7 +207,6 @@ export default function AnalyticsPage() {
       });
     } else {
       filteredSaleItems.forEach((item) => {
-        // Look up corresponding sale date
         const sale = sales.find((s) => s.id === item.sale_id);
         if (sale) {
           const date = new Date(sale.sale_date);
@@ -207,7 +232,7 @@ export default function AnalyticsPage() {
     const regionsList = ["Delhi NCR", "Maharashtra", "Karnataka", "West Bengal", "Tamil Nadu", "Walk-in"];
     regionsList.forEach((r) => (regionalRevenueMap[r] = 0));
 
-    if (selectedCategory === "All") {
+    if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
         const region = s.customers?.region || "Walk-in";
         regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(s.total_amount);
@@ -254,9 +279,9 @@ export default function AnalyticsPage() {
       value: Number(categoryValueMap[category].toFixed(2)),
     }));
 
-    // 8. Group Top Customers by Spending
+    // 8. Group Top Customers by Spending (Leaderboard)
     const customerSpendingMap: { [key: string]: number } = {};
-    if (selectedCategory === "All") {
+    if (selectedCategory === "All" && !selectedProduct) {
       filteredSales.forEach((s) => {
         const custName = s.customers?.name || "Walk-in (Guest)";
         customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
@@ -288,7 +313,7 @@ export default function AnalyticsPage() {
       salesByCategory,
       topCustomers,
     };
-  }, [rawData, timeRange, selectedRegion, selectedCategory]);
+  }, [rawData, timeRange, selectedRegion, selectedCategory, selectedMonth, selectedProduct, selectedCustomer]);
 
   if (authLoading || loading) {
     return (
@@ -316,6 +341,14 @@ export default function AnalyticsPage() {
   }
 
   const { kpis, revenueOverTime, revenueByRegion, topProducts, salesByCategory, topCustomers } = aggregatedData;
+
+  const hasActiveFilters =
+    timeRange !== "all" ||
+    selectedRegion !== "All" ||
+    selectedCategory !== "All" ||
+    selectedMonth !== null ||
+    selectedProduct !== null ||
+    selectedCustomer !== null;
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
@@ -352,7 +385,7 @@ export default function AnalyticsPage() {
             </div>
             <div className="flex items-center gap-1 text-3xs font-semibold text-zinc-400">
               <MousePointerClick className="h-3.5 w-3.5" />
-              <span>Tip: Click chart bars or pie slices to filter!</span>
+              <span>Tip: Click on ANY chart element to filter!</span>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -410,14 +443,43 @@ export default function AnalyticsPage() {
               </select>
             </div>
           </div>
-          
-          {(timeRange !== "all" || selectedRegion !== "All" || selectedCategory !== "All") && (
-            <div className="flex justify-end pt-1">
+
+          {/* Graphical Active Filters Tags */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-50">
+              <div className="flex flex-wrap gap-1.5 items-center">
+                <span className="text-3xs font-bold text-zinc-400 uppercase">Active Filters:</span>
+                {selectedMonth && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    📅 {selectedMonth} <button onClick={() => setSelectedMonth(null)} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
+                {selectedRegion !== "All" && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    📍 {selectedRegion} <button onClick={() => setSelectedRegion("All")} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
+                {selectedCategory !== "All" && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    🛍️ Category: {selectedCategory} <button onClick={() => setSelectedCategory("All")} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
+                {selectedProduct && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    ☕ Product: {selectedProduct} <button onClick={() => setSelectedProduct(null)} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
+                {selectedCustomer && (
+                  <span className="inline-flex items-center gap-1 rounded bg-zinc-900 text-white px-2 py-0.5 text-3xs font-bold">
+                    👤 Customer: {selectedCustomer} <button onClick={() => setSelectedCustomer(null)} className="hover:text-red-400">✕</button>
+                  </span>
+                )}
+              </div>
               <button
                 onClick={resetFilters}
                 className="text-3xs font-bold text-red-500 hover:text-red-700 uppercase tracking-wider transition-all"
               >
-                ✕ Clear Active Filters
+                ✕ Clear All Filters
               </button>
             </div>
           )}
@@ -467,10 +529,17 @@ export default function AnalyticsPage() {
 
         {/* Row 2: Sales Charts Grid */}
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Chart A: Revenue Over Time (Line) */}
+          {/* Chart A: Revenue Over Time (Line with Click-Filtering) */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm flex flex-col">
-            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-100 pb-3 mb-4">
-              <TrendingUp className="h-4 w-4 text-zinc-500" /> Revenue Over Time
+            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-zinc-500" /> Revenue Over Time
+              </div>
+              {selectedMonth && (
+                <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
+                  Filtered Month: {selectedMonth}
+                </span>
+              )}
             </h3>
             <div className="h-72 w-full">
               {revenueOverTime.length === 0 ? (
@@ -479,7 +548,17 @@ export default function AnalyticsPage() {
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueOverTime} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <LineChart
+                    data={revenueOverTime}
+                    margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+                    style={{ cursor: "pointer" }}
+                    onClick={(data: any) => {
+                      const monthName = data?.activeLabel;
+                      if (monthName) {
+                        setSelectedMonth(selectedMonth === monthName ? null : monthName);
+                      }
+                    }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
                     <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
@@ -488,7 +567,29 @@ export default function AnalyticsPage() {
                       itemStyle={{ color: "#fff" }}
                       labelStyle={{ fontWeight: "bold" }}
                     />
-                    <Line type="monotone" dataKey="revenue" stroke="#000000" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Revenue (₹)" />
+                    <Line
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#000000"
+                      strokeWidth={2.5}
+                      dot={(props: any) => {
+                        const { cx, cy, payload } = props;
+                        const isSelected = selectedMonth === payload.name;
+                        return (
+                          <circle
+                            key={payload.name}
+                            cx={cx}
+                            cy={cy}
+                            r={isSelected ? 6 : 4}
+                            fill={isSelected ? "#000000" : "#71717a"}
+                            stroke="#fff"
+                            strokeWidth={1.5}
+                          />
+                        );
+                      }}
+                      activeDot={{ r: 6 }}
+                      name="Revenue (₹)"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               )}
@@ -503,7 +604,7 @@ export default function AnalyticsPage() {
               </div>
               {selectedRegion !== "All" && (
                 <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
-                  Filtered
+                  Filtered Region: {selectedRegion}
                 </span>
               )}
             </h3>
@@ -553,10 +654,17 @@ export default function AnalyticsPage() {
 
         {/* Row 3: Product Recommendations & Category Splits */}
         <div className="grid gap-6 md:grid-cols-3">
-          {/* Chart C: Top Products (Horizontal Bar) */}
+          {/* Chart C: Top Products (Horizontal Bar with Cross-Filtering) */}
           <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm md:col-span-2 flex flex-col">
-            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-100 pb-3 mb-4">
-              <Coffee className="h-4 w-4 text-zinc-500" /> Best-Selling Items
+            <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Coffee className="h-4 w-4 text-zinc-500" /> Best-Selling Items
+              </div>
+              {selectedProduct && (
+                <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
+                  Filtered Product: {selectedProduct}
+                </span>
+              )}
             </h3>
             <div className="h-64 w-full">
               {topProducts.length === 0 ? (
@@ -573,7 +681,27 @@ export default function AnalyticsPage() {
                       contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
                       itemStyle={{ color: "#fff" }}
                     />
-                    <Bar dataKey="quantity" fill="#18181b" radius={[0, 4, 4, 0]} name="Qty Sold" />
+                    <Bar
+                      dataKey="quantity"
+                      fill="#71717a"
+                      radius={[0, 4, 4, 0]}
+                      name="Qty Sold"
+                      style={{ cursor: "pointer" }}
+                      onClick={(data: any) => {
+                        const name = data?.name || data?.payload?.name;
+                        if (name) {
+                          setSelectedProduct(selectedProduct === name ? null : name);
+                        }
+                      }}
+                    >
+                      {topProducts.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={selectedProduct === entry.name ? "#18181b" : "#71717a"}
+                          opacity={selectedProduct === null || selectedProduct === entry.name ? 1 : 0.4}
+                        />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -588,7 +716,7 @@ export default function AnalyticsPage() {
               </div>
               {selectedCategory !== "All" && (
                 <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
-                  Filtered
+                  Filtered Category: {selectedCategory}
                 </span>
               )}
             </h3>
@@ -644,7 +772,7 @@ export default function AnalyticsPage() {
                     }`}
                   >
                     <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[salesByCategory.indexOf(entry) % COLORS.length] }} />
-                    <span className={selectedCategory === entry.name ? "underline font-extrabold" : ""}>
+                    <span className={selectedCategory === entry.name ? "underline font-extrabold text-zinc-900" : ""}>
                       {entry.name} ({kpis.totalRevenue > 0 ? ((entry.value / kpis.totalRevenue) * 100).toFixed(0) : 0}%)
                     </span>
                   </button>
@@ -654,10 +782,17 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Row 4: Top Customers (Leaderboard list) */}
+        {/* Row 4: Top Customers (Leaderboard list with Cross-Filtering) */}
         <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
-          <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-100 pb-3 mb-4">
-            <Award className="h-4 w-4 text-zinc-500" /> Customer Leaderboard
+          <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-wider flex items-center justify-between border-b border-zinc-100 pb-3 mb-4">
+            <div className="flex items-center gap-2">
+              <Award className="h-4 w-4 text-zinc-500" /> Customer Leaderboard
+            </div>
+            {selectedCustomer && (
+              <span className="text-4xs font-extrabold bg-zinc-950 text-white rounded px-1.5 py-0.5 uppercase tracking-wide">
+                Filtered Customer: {selectedCustomer}
+              </span>
+            )}
           </h3>
           <div className="overflow-x-auto">
             {topCustomers.length === 0 ? (
@@ -674,20 +809,29 @@ export default function AnalyticsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
-                  {topCustomers.map((c, index) => (
-                    <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-zinc-900">#{index + 1}</td>
-                      <td className="py-3.5 px-4 flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-zinc-100 text-zinc-800 flex items-center justify-center font-extrabold text-3xs border border-zinc-200 uppercase">
-                          {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                        </div>
-                        <span>{c.name}</span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right font-extrabold text-zinc-950">
-                        ₹{c.spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </td>
-                    </tr>
-                  ))}
+                  {topCustomers.map((c, index) => {
+                    const isSelected = selectedCustomer === c.name;
+                    return (
+                      <tr
+                        key={index}
+                        onClick={() => setSelectedCustomer(isSelected ? null : c.name)}
+                        className={`cursor-pointer transition-all ${
+                          isSelected ? "bg-zinc-100 font-bold" : "hover:bg-zinc-50/50"
+                        } ${selectedCustomer && !isSelected ? "opacity-40" : ""}`}
+                      >
+                        <td className="py-3.5 px-4 font-bold text-zinc-900">#{index + 1}</td>
+                        <td className="py-3.5 px-4 flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-full bg-zinc-100 text-zinc-800 flex items-center justify-center font-extrabold text-3xs border border-zinc-200 uppercase">
+                            {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                          </div>
+                          <span>{c.name}</span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right font-extrabold text-zinc-950">
+                          ₹{c.spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
