@@ -72,7 +72,7 @@ export default function LoginPage() {
       </header>
 
       {/* Center Registration/Login Card */}
-      <div className="w-full max-w-sm rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-8 md:p-9 shadow-2xl text-white relative z-10 mt-12">
+      <div className="w-full max-w-md rounded-3xl border border-white/20 bg-white/10 backdrop-blur-md p-8 md:p-10 shadow-2xl text-white relative z-10 mt-12">
         <div className="text-center mb-7">
           <h1 className="text-2xl font-black tracking-wide text-white">Sign in to my-POS</h1>
           <p className="mt-1.5 text-3xs font-semibold text-white/60">
@@ -143,23 +143,23 @@ export default function LoginPage() {
         </form>
 
         {/* Demo Accounts Details Block */}
-        <div className="mt-8 rounded-2xl bg-white/5 p-4.5 text-3xs text-white/80 border border-white/5 leading-relaxed">
+        <div className="mt-8 rounded-2xl bg-white/5 p-5 text-3xs text-white/80 border border-white/5 leading-relaxed">
           <p className="font-bold text-amber-300 flex items-center gap-1.5 uppercase tracking-wide">
             🔑 Operator Sign-In Details:
           </p>
-          <div className="mt-3 space-y-2">
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
               <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Admin Email</p>
-              <code className="text-white block mt-0.5 font-mono text-2xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaranr@gmail.com</code>
+              <code className="text-white block mt-0.5 font-mono text-3xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaranr@gmail.com</code>
             </div>
             <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
               <p className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Cashier Email</p>
-              <code className="text-white block mt-0.5 font-mono text-2xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaran5@gmail.com</code>
+              <code className="text-white block mt-0.5 font-mono text-3xs select-all overflow-x-auto whitespace-nowrap scrollbar-none">nikishkumaran5@gmail.com</code>
             </div>
-            <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 flex justify-between items-center">
-              <span className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Password</span>
-              <code className="text-white font-mono text-2xs select-all bg-white/10 px-2 py-0.5 rounded">Pos@123</code>
-            </div>
+          </div>
+          <div className="bg-white/5 rounded-xl p-2.5 border border-white/5 flex justify-between items-center mt-3">
+            <span className="text-4xs text-indigo-300 uppercase font-black tracking-wider">Password</span>
+            <code className="text-white font-mono text-2xs select-all bg-white/10 px-2 py-0.5 rounded">Pos@123</code>
           </div>
         </div>
       </div>
