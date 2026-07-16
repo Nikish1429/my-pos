@@ -158,7 +158,7 @@ export default function LoginPage() {
             </li>
             <li className="flex justify-between items-center bg-white/5 rounded-lg px-2.5 py-1">
               <span>Password:</span>
-              <code className="text-white bg-white/10 px-2 py-0.5 rounded italic">Set by you in Supabase</code>
+              <code className="text-white bg-white/10 px-2 py-0.5 rounded font-mono">Pos@123</code>
             </li>
           </ul>
         </div>
