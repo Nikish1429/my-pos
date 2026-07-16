@@ -174,7 +174,7 @@ export default function Home() {
                       key={p.id}
                       className="inline-flex items-center gap-1 rounded bg-zinc-100 px-2.5 py-1 text-2xs font-semibold text-zinc-800 border border-zinc-200"
                     >
-                      {p.name} (${Number(p.price).toFixed(2)})
+                      {p.name} (₹{Number(p.price).toFixed(2)})
                     </span>
                   ))}
                 </div>

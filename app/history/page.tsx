@@ -197,7 +197,7 @@ export default function HistoryPage() {
                           {sale.user ? sale.user.name : "Terminal #1"}
                         </td>
                         <td className="px-4 py-4 text-xs text-right font-extrabold text-zinc-900">
-                          ${Number(sale.total_amount).toFixed(2)}
+                          ₹{Number(sale.total_amount).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -253,7 +253,7 @@ export default function HistoryPage() {
                     <div key={idx} className="flex justify-between text-3xs text-zinc-700">
                       <span className="truncate max-w-[120px]">{item.product ? item.product.name : "Unknown Product"}</span>
                       <span className="w-12 text-center">x{item.quantity}</span>
-                      <span className="w-12 text-right">${(item.unit_price * item.quantity).toFixed(2)}</span>
+                      <span className="w-12 text-right">₹{(item.unit_price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -261,7 +261,7 @@ export default function HistoryPage() {
                 {/* Total */}
                 <div className="flex justify-between font-extrabold text-sm text-right pt-1">
                   <span>TOTAL:</span>
-                  <span>${Number(selectedSaleDetail.total_amount).toFixed(2)}</span>
+                  <span>₹{Number(selectedSaleDetail.total_amount).toFixed(2)}</span>
                 </div>
               </div>
             )}

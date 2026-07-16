@@ -267,7 +267,7 @@ export default function InventoryPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-right font-medium text-zinc-900">
-                          ${Number(product.price).toFixed(2)}
+                          ₹{Number(product.price).toFixed(2)}
                         </td>
                         <td className="px-6 py-4 text-sm text-center">
                           <span
@@ -353,7 +353,7 @@ export default function InventoryPage() {
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                    Price ($)
+                    Price (₹)
                   </label>
                   <input
                     type="number"

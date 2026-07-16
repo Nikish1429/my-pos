@@ -315,7 +315,7 @@ export default function BillingPage() {
                       </span>
                       <div className="mt-auto pt-4 flex items-center justify-between">
                         <span className="text-base font-extrabold text-zinc-900">
-                          ${Number(product.price).toFixed(2)}
+                          ₹{Number(product.price).toFixed(2)}
                         </span>
                         <span
                           className={`text-2xs font-semibold px-2 py-0.5 rounded ${
@@ -379,7 +379,7 @@ export default function BillingPage() {
                 <div key={item.product.id} className="flex items-center gap-3 border-b border-zinc-100 pb-3">
                   <div className="flex-1">
                     <p className="font-bold text-zinc-900 text-sm line-clamp-1">{item.product.name}</p>
-                    <p className="text-xs text-zinc-500">${Number(item.product.price).toFixed(2)} each</p>
+                    <p className="text-xs text-zinc-500">₹{Number(item.product.price).toFixed(2)} each</p>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -398,7 +398,7 @@ export default function BillingPage() {
                   </div>
                   <div className="text-right pl-2">
                     <p className="text-sm font-bold text-zinc-900">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      ₹{(item.product.price * item.quantity).toFixed(2)}
                     </p>
                     <button
                       onClick={() => removeFromCart(item.product.id)}
@@ -422,7 +422,7 @@ export default function BillingPage() {
 
             <div className="flex items-center justify-between text-base font-extrabold text-zinc-900 py-3">
               <span>Total Amount</span>
-              <span>${cartSubtotal.toFixed(2)}</span>
+              <span>₹{cartSubtotal.toFixed(2)}</span>
             </div>
 
             <button
@@ -466,7 +466,7 @@ export default function BillingPage() {
                   <div key={idx} className="flex justify-between">
                     <span className="truncate max-w-[150px]">{item.name}</span>
                     <span className="w-16 text-center">x{item.quantity}</span>
-                    <span className="w-16 text-right">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="w-16 text-right">₹{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
@@ -475,11 +475,11 @@ export default function BillingPage() {
               <div className="py-4 text-right space-y-1 text-sm font-bold">
                 <div className="flex justify-between">
                   <span>SUBTOTAL:</span>
-                  <span>${completedSale.totalAmount.toFixed(2)}</span>
+                  <span>₹{completedSale.totalAmount.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between border-t border-zinc-200 pt-2 text-base">
                   <span>TOTAL:</span>
-                  <span>${completedSale.totalAmount.toFixed(2)}</span>
+                  <span>₹{completedSale.totalAmount.toFixed(2)}</span>
                 </div>
               </div>
 
