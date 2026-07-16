@@ -9,10 +9,6 @@ id,name,category,price,stock_quantity
 8,"Masala Chai","Drinks",50,200
 9,"Filter Coffee","Drinks",60,150
 10,"Croissant","Bakery",120,40
-11,"Chocolate Muffin","Bakery",140,35
-12,"Blueberry Scone","Bakery",150,30
-13,"Bagel with Cream Cheese","Bakery",160,25
-14,"Chocolate Chip Cookie","Bakery",80,60
 15,"Brownie","Bakery",120,45
 16,"Apple Danish","Bakery",150,20
 17,"Gulab Jamun (2 pcs)","Bakery",70,50
@@ -29,3 +25,7 @@ id,name,category,price,stock_quantity
 28,"Greek Yogurt","Snacks",120,40
 29,"Samosa (2 pcs)","Snacks",40,120
 30,"Paneer Puff","Snacks",60,80
+11,"Chocolate Muffin","Bakery",140,34
+12,"Blueberry Scone","Bakery",150,29
+13,"Bagel with Cream Cheese","Bakery",160,24
+14,"Chocolate Chip Cookie","Bakery",80,59
