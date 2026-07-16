@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import {
@@ -14,6 +14,9 @@ import {
   Coffee,
   PieChart as PieIcon,
   Award,
+  Calendar,
+  Filter,
+  RefreshCw,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -31,49 +34,260 @@ import {
   Pie,
 } from "recharts";
 
-interface KPI {
-  totalRevenue: number;
-  totalOrders: number;
-  averageOrderValue: number;
+interface CustomerJoin {
+  name: string;
+  region: string;
 }
 
-interface ChartData {
-  kpis: KPI;
-  revenueOverTime: { name: string; revenue: number }[];
-  revenueByRegion: { region: string; revenue: number }[];
-  topProducts: { name: string; quantity: number }[];
-  salesByCategory: { name: string; value: number }[];
-  topCustomers: { name: string; spent: number }[];
+interface UserJoin {
+  name: string;
 }
 
-const COLORS = ["#18181b", "#71717a", "#d4d4d8", "#e4e4e7", "#f4f4f5"];
+interface Sale {
+  id: number;
+  total_amount: number;
+  sale_date: string;
+  customer_id: number | null;
+  user_id: number | null;
+  customers: CustomerJoin | null;
+  users: UserJoin | null;
+}
+
+interface ProductJoin {
+  name: string;
+  category: string;
+}
+
+interface SaleItem {
+  id: number;
+  sale_id: number;
+  product_id: number;
+  quantity: number;
+  unit_price: number;
+  products: ProductJoin | null;
+}
+
+interface RawData {
+  sales: Sale[];
+  saleItems: SaleItem[];
+}
+
+const COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#d4d4d8", "#e4e4e7"];
 
 export default function AnalyticsPage() {
   const { user, loading: authLoading } = useAuth();
-  const [data, setData] = useState<ChartData | null>(null);
+  const [rawData, setRawData] = useState<RawData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Filters State
+  const [timeRange, setTimeRange] = useState<string>("all"); // all, 30, 90, 180
+  const [selectedRegion, setSelectedRegion] = useState<string>("All"); // All, North, South, East, West, Central, Walk-in
+  const [selectedCategory, setSelectedCategory] = useState<string>("All"); // All, Drinks, Bakery, Snacks
+
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/analytics");
+      if (!res.ok) {
+        throw new Error("Failed to load analytics data");
+      }
+      const jsonData = await res.json();
+      setRawData(jsonData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (user) {
-      const fetchAnalytics = async () => {
-        try {
-          setLoading(true);
-          const res = await fetch("/api/analytics");
-          if (!res.ok) {
-            throw new Error("Failed to load analytics data");
-          }
-          const jsonData = await res.json();
-          setData(jsonData);
-        } catch (err: any) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchAnalytics();
     }
   }, [user]);
+
+  // Reset all filters
+  const resetFilters = () => {
+    setTimeRange("all");
+    setSelectedRegion("All");
+    setSelectedCategory("All");
+  };
+
+  // --- INTERACTIVE FILTERING & AGGREGATION ENGINE ---
+  const aggregatedData = useMemo(() => {
+    if (!rawData) return null;
+
+    const { sales, saleItems } = rawData;
+
+    // 1. Filter Sales by Time Range and Region
+    const filteredSales = sales.filter((sale) => {
+      // Time Range Filter
+      if (timeRange !== "all") {
+        const saleDate = new Date(sale.sale_date);
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - parseInt(timeRange));
+        if (saleDate < cutoff) return false;
+      }
+
+      // Region Filter
+      const region = sale.customers?.region || "Walk-in";
+      if (selectedRegion !== "All" && region !== selectedRegion) return false;
+
+      return true;
+    });
+
+    const filteredSaleIds = new Set(filteredSales.map((s) => s.id));
+
+    // 2. Filter Sale Items based on filtered sales and product category
+    const filteredSaleItems = saleItems.filter((item) => {
+      // Must belong to one of the filtered sales
+      if (!filteredSaleIds.has(item.sale_id)) return false;
+
+      // Category Filter
+      const category = item.products?.category || "Other";
+      if (selectedCategory !== "All" && category !== selectedCategory) return false;
+
+      return true;
+    });
+
+    const activeSaleIdsWithItems = new Set(filteredSaleItems.map((item) => item.sale_id));
+
+    // 3. Compute KPI Metrics
+    let totalRevenue = 0;
+    let totalOrders = 0;
+
+    if (selectedCategory === "All") {
+      // Standard: Sum of whole sale totals
+      totalRevenue = filteredSales.reduce((sum, s) => sum + Number(s.total_amount), 0);
+      totalOrders = filteredSales.length;
+    } else {
+      // Category Specific: Sum of matching item values
+      totalRevenue = filteredSaleItems.reduce((sum, item) => sum + Number(item.quantity) * Number(item.unit_price), 0);
+      totalOrders = activeSaleIdsWithItems.size;
+    }
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // 4. Group Revenue Over Time (Timeline Chart)
+    const monthlyRevenueMap: { [key: string]: number } = {};
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    if (selectedCategory === "All") {
+      filteredSales.forEach((s) => {
+        const date = new Date(s.sale_date);
+        const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        monthlyRevenueMap[key] = (monthlyRevenueMap[key] || 0) + Number(s.total_amount);
+      });
+    } else {
+      filteredSaleItems.forEach((item) => {
+        // Look up corresponding sale date
+        const sale = sales.find((s) => s.id === item.sale_id);
+        if (sale) {
+          const date = new Date(sale.sale_date);
+          const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+          monthlyRevenueMap[key] = (monthlyRevenueMap[key] || 0) + Number(item.quantity) * Number(item.unit_price);
+        }
+      });
+    }
+
+    const revenueOverTime = Object.keys(monthlyRevenueMap)
+      .sort()
+      .map((key) => {
+        const [year, month] = key.split("-");
+        const monthLabel = `${monthNames[parseInt(month) - 1]} ${year.slice(-2)}`;
+        return {
+          name: monthLabel,
+          revenue: Number(monthlyRevenueMap[key].toFixed(2)),
+        };
+      });
+
+    // 5. Group Revenue by Region (Bar Chart)
+    const regionalRevenueMap: { [key: string]: number } = {};
+    const regionsList = ["North", "South", "East", "West", "Central", "Walk-in"];
+    regionsList.forEach((r) => (regionalRevenueMap[r] = 0));
+
+    if (selectedCategory === "All") {
+      filteredSales.forEach((s) => {
+        const region = s.customers?.region || "Walk-in";
+        regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(s.total_amount);
+      });
+    } else {
+      filteredSaleItems.forEach((item) => {
+        const sale = sales.find((s) => s.id === item.sale_id);
+        if (sale) {
+          const region = sale.customers?.region || "Walk-in";
+          regionalRevenueMap[region] = (regionalRevenueMap[region] || 0) + Number(item.quantity) * Number(item.unit_price);
+        }
+      });
+    }
+
+    const revenueByRegion = Object.keys(regionalRevenueMap)
+      .map((region) => ({
+        region,
+        revenue: Number(regionalRevenueMap[region].toFixed(2)),
+      }))
+      .filter((r) => r.revenue > 0 || selectedRegion === "All" || r.region === selectedRegion);
+
+    // 6. Group Top Products by Quantity (Horizontal Bar Chart)
+    const productQtyMap: { [key: string]: number } = {};
+    filteredSaleItems.forEach((item) => {
+      const prodName = item.products?.name || "Unknown Product";
+      productQtyMap[prodName] = (productQtyMap[prodName] || 0) + Number(item.quantity);
+    });
+
+    const topProducts = Object.keys(productQtyMap)
+      .map((name) => ({ name, quantity: productQtyMap[name] }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
+
+    // 7. Group Sales by Category (Donut Chart)
+    const categoryValueMap: { [key: string]: number } = {};
+    filteredSaleItems.forEach((item) => {
+      const category = item.products?.category || "Other";
+      const value = Number(item.quantity) * Number(item.unit_price);
+      categoryValueMap[category] = (categoryValueMap[category] || 0) + value;
+    });
+
+    const salesByCategory = Object.keys(categoryValueMap).map((category) => ({
+      name: category,
+      value: Number(categoryValueMap[category].toFixed(2)),
+    }));
+
+    // 8. Group Top Customers by Spending
+    const customerSpendingMap: { [key: string]: number } = {};
+    if (selectedCategory === "All") {
+      filteredSales.forEach((s) => {
+        const custName = s.customers?.name || "Walk-in (Guest)";
+        customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(s.total_amount);
+      });
+    } else {
+      filteredSaleItems.forEach((item) => {
+        const sale = sales.find((s) => s.id === item.sale_id);
+        if (sale) {
+          const custName = sale.customers?.name || "Walk-in (Guest)";
+          customerSpendingMap[custName] = (customerSpendingMap[custName] || 0) + Number(item.quantity) * Number(item.unit_price);
+        }
+      });
+    }
+
+    const topCustomers = Object.keys(customerSpendingMap)
+      .map((name) => ({ name, spent: Number(customerSpendingMap[name].toFixed(2)) }))
+      .sort((a, b) => b.spent - a.spent)
+      .slice(0, 5);
+
+    return {
+      kpis: {
+        totalRevenue: Number(totalRevenue.toFixed(2)),
+        totalOrders,
+        averageOrderValue: Number(averageOrderValue.toFixed(2)),
+      },
+      revenueOverTime,
+      revenueByRegion,
+      topProducts,
+      salesByCategory,
+      topCustomers,
+    };
+  }, [rawData, timeRange, selectedRegion, selectedCategory]);
 
   if (authLoading || loading) {
     return (
@@ -86,21 +300,21 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (error || !data) {
+  if (error || !rawData || !aggregatedData) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 font-sans p-4">
         <p className="text-sm text-red-600 font-bold">⚠️ Error: {error || "Failed to load dashboard data"}</p>
-        <Link
-          href="/"
+        <button
+          onClick={fetchAnalytics}
           className="mt-4 flex items-center gap-2 rounded-xl bg-zinc-950 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-zinc-800 transition-all"
         >
-          <ArrowLeft className="h-4 w-4" /> Go back Dashboard
-        </Link>
+          <ArrowLeft className="h-4 w-4" /> Retry Connection
+        </button>
       </div>
     );
   }
 
-  const { kpis, revenueOverTime, revenueByRegion, topProducts, salesByCategory, topCustomers } = data;
+  const { kpis, revenueOverTime, revenueByRegion, topProducts, salesByCategory, topCustomers } = aggregatedData;
 
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
@@ -116,15 +330,92 @@ export default function AnalyticsPage() {
             </Link>
             <span className="text-lg font-extrabold tracking-tight text-zinc-950">Store Analytics Dashboard</span>
           </div>
-          <span className="rounded bg-zinc-100 px-2 py-0.5 text-2xs font-extrabold uppercase text-zinc-600 tracking-wider">
-            Live Feed
-          </span>
+          <button
+            onClick={fetchAnalytics}
+            className="flex items-center gap-1 text-2xs font-extrabold uppercase text-zinc-500 hover:text-zinc-950 transition-all tracking-wider"
+          >
+            <RefreshCw className="h-3 w-3" /> Sync Data
+          </button>
         </div>
       </nav>
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
-        
+
+        {/* INTERACTIVE FILTERS CONTROLS PANEL */}
+        <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 text-zinc-950 border-b border-zinc-100 pb-2.5">
+            <Filter className="h-4 w-4 text-zinc-500" />
+            <h2 className="text-xs font-extrabold uppercase tracking-wider">Interactive Report Filters</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {/* Filter 1: Time Range */}
+            <div>
+              <label className="block text-3xs font-extrabold uppercase tracking-wider text-zinc-400">
+                Timeline Period
+              </label>
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
+              >
+                <option value="all">All Time (Last 6 Months)</option>
+                <option value="30">Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+                <option value="180">Last 180 Days</option>
+              </select>
+            </div>
+
+            {/* Filter 2: Region */}
+            <div>
+              <label className="block text-3xs font-extrabold uppercase tracking-wider text-zinc-400">
+                Customer Region
+              </label>
+              <select
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
+              >
+                <option value="All">All Regions</option>
+                <option value="North">North</option>
+                <option value="South">South</option>
+                <option value="East">East</option>
+                <option value="West">West</option>
+                <option value="Central">Central</option>
+                <option value="Walk-in">Walk-in Customers</option>
+              </select>
+            </div>
+
+            {/* Filter 3: Category */}
+            <div>
+              <label className="block text-3xs font-extrabold uppercase tracking-wider text-zinc-400">
+                Product Category
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="mt-1.5 w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs outline-none focus:border-zinc-500 text-zinc-900 font-semibold shadow-sm"
+              >
+                <option value="All">All Categories</option>
+                <option value="Drinks">Drinks Only</option>
+                <option value="Bakery">Bakery Only</option>
+                <option value="Snacks">Snacks Only</option>
+              </select>
+            </div>
+          </div>
+          
+          {(timeRange !== "all" || selectedRegion !== "All" || selectedCategory !== "All") && (
+            <div className="flex justify-end pt-1">
+              <button
+                onClick={resetFilters}
+                className="text-3xs font-bold text-red-500 hover:text-red-700 uppercase tracking-wider transition-all"
+              >
+                ✕ Clear Active Filters
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Row 1: KPI Widgets */}
         <div className="grid gap-4 md:grid-cols-3">
           {/* Card 1: Revenue */}
@@ -175,19 +466,25 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-4 w-4 text-zinc-500" /> Revenue Over Time
             </h3>
             <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueOverTime} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
-                  <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
-                    itemStyle={{ color: "#fff" }}
-                    labelStyle={{ fontWeight: "bold" }}
-                  />
-                  <Line type="monotone" dataKey="revenue" stroke="#000000" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Revenue (₹)" />
-                </LineChart>
-              </ResponsiveContainer>
+              {revenueOverTime.length === 0 ? (
+                <div className="h-full w-full flex items-center justify-center text-xs text-zinc-400 font-medium">
+                  No data matches active filters
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={revenueOverTime} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                    <XAxis dataKey="name" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
+                      itemStyle={{ color: "#fff" }}
+                      labelStyle={{ fontWeight: "bold" }}
+                    />
+                    <Line type="monotone" dataKey="revenue" stroke="#000000" strokeWidth={2.5} dot={{ r: 4 }} activeDot={{ r: 6 }} name="Revenue (₹)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
@@ -197,18 +494,24 @@ export default function AnalyticsPage() {
               <MapPin className="h-4 w-4 text-zinc-500" /> Revenue by Region
             </h3>
             <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueByRegion} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
-                  <XAxis dataKey="region" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
-                  <Tooltip
-                    contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
-                    itemStyle={{ color: "#fff" }}
-                  />
-                  <Bar dataKey="revenue" fill="#18181b" radius={[6, 6, 0, 0]} name="Sales (₹)" />
-                </BarChart>
-              </ResponsiveContainer>
+              {revenueByRegion.length === 0 ? (
+                <div className="h-full w-full flex items-center justify-center text-xs text-zinc-400 font-medium">
+                  No data matches active filters
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueByRegion} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
+                    <XAxis dataKey="region" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
+                    <Tooltip
+                      contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
+                      itemStyle={{ color: "#fff" }}
+                    />
+                    <Bar dataKey="revenue" fill="#18181b" radius={[6, 6, 0, 0]} name="Sales (₹)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
@@ -221,18 +524,24 @@ export default function AnalyticsPage() {
               <Coffee className="h-4 w-4 text-zinc-500" /> Best-Selling Items
             </h3>
             <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topProducts} layout="vertical" margin={{ top: 5, right: 10, left: 35, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e4e4e7" />
-                  <XAxis type="number" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis dataKey="name" type="category" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} width={100} />
-                  <Tooltip
-                    contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
-                    itemStyle={{ color: "#fff" }}
-                  />
-                  <Bar dataKey="quantity" fill="#18181b" radius={[0, 4, 4, 0]} name="Qty Sold" />
-                </BarChart>
-              </ResponsiveContainer>
+              {topProducts.length === 0 ? (
+                <div className="h-full w-full flex items-center justify-center text-xs text-zinc-400 font-medium">
+                  No data matches active filters
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topProducts} layout="vertical" margin={{ top: 5, right: 10, left: 35, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e4e4e7" />
+                    <XAxis type="number" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis dataKey="name" type="category" stroke="#888888" fontSize={10} tickLine={false} axisLine={false} width={100} />
+                    <Tooltip
+                      contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
+                      itemStyle={{ color: "#fff" }}
+                    />
+                    <Bar dataKey="quantity" fill="#18181b" radius={[0, 4, 4, 0]} name="Qty Sold" />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
@@ -242,37 +551,47 @@ export default function AnalyticsPage() {
               <PieIcon className="h-4 w-4 text-zinc-500" /> Sales by Category
             </h3>
             <div className="h-52 w-full relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={salesByCategory}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {salesByCategory.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
-                    itemStyle={{ color: "#fff" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              {salesByCategory.length === 0 ? (
+                <div className="h-full w-full flex items-center justify-center text-xs text-zinc-400 font-medium">
+                  No data matches active filters
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={salesByCategory}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {salesByCategory.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: "#18181b", borderRadius: "12px", border: "none", color: "#fff" }}
+                      itemStyle={{ color: "#fff" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
             </div>
             {/* Pie Legend list */}
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 justify-center text-3xs font-semibold text-zinc-600">
-              {salesByCategory.map((entry, index) => (
-                <div key={entry.name} className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span>{entry.name} ({((entry.value / kpis.totalRevenue) * 100).toFixed(0)}%)</span>
-                </div>
-              ))}
-            </div>
+            {salesByCategory.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 justify-center text-3xs font-semibold text-zinc-600">
+                {salesByCategory.map((entry, index) => (
+                  <div key={entry.name} className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                    <span>
+                      {entry.name} ({kpis.totalRevenue > 0 ? ((entry.value / kpis.totalRevenue) * 100).toFixed(0) : 0}%)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -282,31 +601,37 @@ export default function AnalyticsPage() {
             <Award className="h-4 w-4 text-zinc-500" /> Customer Leaderboard
           </h3>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-zinc-200 text-left text-xs">
-              <thead>
-                <tr className="text-zinc-400 font-bold uppercase tracking-wider">
-                  <th className="py-3 px-4">Rank</th>
-                  <th className="py-3 px-4">Customer Name</th>
-                  <th className="py-3 px-4 text-right">Total Revenue Generated</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
-                {topCustomers.map((c, index) => (
-                  <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-zinc-900">#{index + 1}</td>
-                    <td className="py-3.5 px-4 flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-zinc-100 text-zinc-800 flex items-center justify-center font-extrabold text-3xs border border-zinc-200 uppercase">
-                        {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                      </div>
-                      <span>{c.name}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right font-extrabold text-zinc-950">
-                      ₹{c.spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
+            {topCustomers.length === 0 ? (
+              <div className="py-6 text-center text-xs text-zinc-400 font-medium">
+                No customer transactions match active filters
+              </div>
+            ) : (
+              <table className="min-w-full divide-y divide-zinc-200 text-left text-xs">
+                <thead>
+                  <tr className="text-zinc-400 font-bold uppercase tracking-wider">
+                    <th className="py-3 px-4">Rank</th>
+                    <th className="py-3 px-4">Customer Name</th>
+                    <th className="py-3 px-4 text-right">Total Revenue Generated</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-zinc-100 font-medium text-zinc-800">
+                  {topCustomers.map((c, index) => (
+                    <tr key={index} className="hover:bg-zinc-50/50 transition-colors">
+                      <td className="py-3.5 px-4 font-bold text-zinc-900">#{index + 1}</td>
+                      <td className="py-3.5 px-4 flex items-center gap-2">
+                        <div className="h-7 w-7 rounded-full bg-zinc-100 text-zinc-800 flex items-center justify-center font-extrabold text-3xs border border-zinc-200 uppercase">
+                          {c.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+                        </div>
+                        <span>{c.name}</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-extrabold text-zinc-950">
+                        ₹{c.spent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
